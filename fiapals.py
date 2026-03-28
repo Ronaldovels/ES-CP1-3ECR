@@ -173,6 +173,132 @@ def fazer_login():
         pausar()
         return None
 
+#─────────────────────────────────────────
+#PERFIL
+#─────────────────────────────────────────
+def tela_perfil(usuario):
+    while True:
+        cabecalho("Meu Perfil")
+        bio = usuario["bio"] or "Sem bio."
+        inter = ", ".join(usuario["interesses"]) or "Nenhum."
+        print(f"\n  Nome:       {usuario['nome']}")
+        print(f"  E-mail:     {usuario['email']}")
+        print(f"  Curso:      {usuario['curso']} - {usuario['ano']}o ano")
+        print(f"  Bio:        {bio}")
+        print(f"  Interesses: {inter}\n")
+
+        op = menu(["Editar bio", "Editar interesses", "Ver meus eventos", "Voltar"])
+
+        if op == 1:
+            nova = pegar("Nova bio", vazio_ok=True)
+            db = db_carregar()
+            achar_usuario_id(db, usuario["id"])["bio"] = nova
+            db_salvar(db)
+            usuario["bio"] = nova
+            print("\n  Bio atualizada!")
+            pausar()
+
+        elif op == 2:
+            print("  Separe por virgula. Ex: Python, Games, UX")
+            entrada = pegar("Interesses")
+            lista = [i.strip() for i in entrada.split(",") if i.strip()]
+            db = db_carregar()
+            achar_usuario_id(db, usuario["id"])["interesses"] = lista
+            db_salvar(db)
+            usuario["interesses"] = lista
+            print("\n  Interesses atualizados!")
+            pausar()
+
+        elif op == 3:
+            cabecalho("Meus Eventos")
+            db = db_carregar()
+            ids = usuario.get("eventos_inscritos", [])
+            if not ids:
+                print("\n  Nenhum evento inscrito ainda.")
+            else:
+                for eid in ids:
+                    ev = achar_evento(db, eid)
+                    if ev:
+                        print(f"\n  * {ev['nome']} — {ev['data']}")
+            pausar()
+
+        else:
+            break
     print(f"\n  Bem-vindo(a), {u['nome']}!")
     pausar()
     return u
+
+# ─────────────────────────────────────────
+#  TURMA
+# ─────────────────────────────────────────
+
+def tela_turma(usuario):
+    while True:
+        db = db_carregar()
+        turma = achar_turma(db, usuario["curso"], usuario["ano"])
+        cabecalho(f"Turma: {turma['curso']} - {turma['ano']}o ano")
+        print()
+        op = menu(["Ver membros", "Ver feed", "Publicar post",
+                   "Ver eventos da turma", "Criar evento", "Voltar"])
+
+        if op == 1:
+            cabecalho("Membros")
+            if not turma["membros"]:
+                print("\n  Nenhum membro ainda.")
+            else:
+                for uid in turma["membros"]:
+                    u = achar_usuario_id(db, uid)
+                    if u:
+                        inter = f" | {', '.join(u['interesses'])}" if u["interesses"] else ""
+                        print(f"  * {u['nome']}{inter}")
+            pausar()
+
+        elif op == 2:
+            cabecalho("Feed da Turma")
+            posts = turma.get("posts", [])
+            if not posts:
+                print("\n  Nenhum post ainda.")
+            else:
+                for p in reversed(posts[-15:]):
+                    autor = achar_usuario_id(db, p["autor_id"])
+                    nome_autor = autor["nome"] if autor else "?"
+                    print(f"\n  {nome_autor} [{p['data']}]")
+                    print(f"  {p['conteudo']}")
+                    print("  " + "-" * 40)
+            pausar()
+
+        elif op == 3:
+            cabecalho("Publicar Post")
+            texto = pegar("Seu post")
+            if len(texto) > 500:
+                print("\n  Post muito longo (max 500 caracteres).")
+            else:
+                turma["posts"].append({
+                    "id": str(uuid.uuid4()),
+                    "autor_id": usuario["id"],
+                    "conteudo": texto,
+                    "data": datetime.now().strftime("%d/%m/%Y %H:%M"),
+                })
+                db_salvar(db)
+                print("\n  Post publicado!")
+            pausar()
+
+        elif op == 4:
+            cabecalho("Eventos da Turma")
+            eventos = [e for e in db["eventos"] if e["turma_id"] == turma["id"]]
+            if not eventos:
+                print("\n  Nenhum evento ainda.")
+            else:
+                for e in eventos:
+                    cond = e["condicoes"]
+                    rest = "Aberto" if cond["aberto"] else "Restrito"
+                    print(f"\n  [{e['id'][:6]}] {e['nome']} — {e['data']}")
+                    print(f"  {e['descricao']}")
+                    print(f"  Acesso: {rest} | {len(e['participantes'])} inscrito(s)")
+            pausar()
+
+        elif op == 5:
+            tela_criar_evento(usuario)
+
+        else:
+            break
