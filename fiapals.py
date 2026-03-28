@@ -73,3 +73,47 @@ def achar_evento(db, evento_id):
         if e["id"] == evento_id:
             return e
     return None
+
+
+# ─────────────────────────────────────────
+# HELPERS DE TERMINAL
+# ─────────────────────────────────────────
+def limpar():
+    os.system("cls" if os.name == "nt" else "clear")
+
+def cabecalho(sub=""):
+    limpar()
+    print("=" * 45)
+    print("  FiaPals - Rede Social da FIAP")
+    if sub:
+        print(f"  > {sub}")
+    print("=" * 45)
+
+def menu(opcoes):
+    for i, op in enumerate(opcoes, 1):
+        print(f"  [{i}] {op}")
+    while True:
+        r = input("\n  Escolha: ").strip()
+        if r.isdigit() and 1 <= int(r) <= len(opcoes):
+            return int(r)
+        print("  Opcao invalida.")
+
+def pegar(label, vazio_ok=False):
+    while True:
+        v = input(f"  {label}: ").strip()
+        if v or vazio_ok:
+            return v
+        print("  Campo obrigatorio.")
+
+def pausar():
+    input("\n  [Enter para continuar]")
+
+def escolher_lista(titulo, opcoes):
+    print(f"\n  {titulo}")
+    for i, op in enumerate(opcoes, 1):
+        print(f"    [{i}] {op}")
+    while True:
+        r = input("\n  Escolha: ").strip()
+        if r.isdigit() and 1 <= int(r) <= len(opcoes):
+            return opcoes[int(r) - 1]
+        print("  Opcao invalida.")
