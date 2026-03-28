@@ -173,6 +173,57 @@ def fazer_login():
         pausar()
         return None
 
+#─────────────────────────────────────────
+#PERFIL
+#─────────────────────────────────────────
+def tela_perfil(usuario):
+    while True:
+        cabecalho("Meu Perfil")
+        bio = usuario["bio"] or "Sem bio."
+        inter = ", ".join(usuario["interesses"]) or "Nenhum."
+        print(f"\n  Nome:       {usuario['nome']}")
+        print(f"  E-mail:     {usuario['email']}")
+        print(f"  Curso:      {usuario['curso']} - {usuario['ano']}o ano")
+        print(f"  Bio:        {bio}")
+        print(f"  Interesses: {inter}\n")
+
+        op = menu(["Editar bio", "Editar interesses", "Ver meus eventos", "Voltar"])
+
+        if op == 1:
+            nova = pegar("Nova bio", vazio_ok=True)
+            db = db_carregar()
+            achar_usuario_id(db, usuario["id"])["bio"] = nova
+            db_salvar(db)
+            usuario["bio"] = nova
+            print("\n  Bio atualizada!")
+            pausar()
+
+        elif op == 2:
+            print("  Separe por virgula. Ex: Python, Games, UX")
+            entrada = pegar("Interesses")
+            lista = [i.strip() for i in entrada.split(",") if i.strip()]
+            db = db_carregar()
+            achar_usuario_id(db, usuario["id"])["interesses"] = lista
+            db_salvar(db)
+            usuario["interesses"] = lista
+            print("\n  Interesses atualizados!")
+            pausar()
+
+        elif op == 3:
+            cabecalho("Meus Eventos")
+            db = db_carregar()
+            ids = usuario.get("eventos_inscritos", [])
+            if not ids:
+                print("\n  Nenhum evento inscrito ainda.")
+            else:
+                for eid in ids:
+                    ev = achar_evento(db, eid)
+                    if ev:
+                        print(f"\n  * {ev['nome']} — {ev['data']}")
+            pausar()
+
+        else:
+            break
     print(f"\n  Bem-vindo(a), {u['nome']}!")
     pausar()
     return u
