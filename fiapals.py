@@ -302,3 +302,60 @@ def tela_turma(usuario):
 
         else:
             break
+        
+def tela_criar_evento(usuario): 
+    
+    cabecalho("Criar Evento") 
+    nome = pegar("Nome do evento") 
+    data = pegar("Data (DD/MM/AAAA)") 
+    descricao = pegar("Descricao") 
+    
+    # Valida data
+    try: 
+        datetime.strptime(data, "%d/%m/%Y") 
+    except ValueError: 
+        print("\n Data invalida. Use DD/MM/AAAA.") 
+        pausar() 
+        return 
+    
+    print("\n Quem pode participar?") 
+    tipo = menu(["Aberto para todos", "So alunos do meu curso", "So minha turma"]) 
+    
+    aberto = False 
+    cursos_perm = [] 
+    
+    
+    if tipo == 1: 
+        aberto = True 
+    elif tipo == 2: 
+        cursos_perm = [usuario["curso"]] 
+    # tipo 3 = lista vazia = so turma 
+    
+    
+    db = db_carregar()
+    turma = achar_turma(db, usuario["curso"], usuario["ano"]) 
+    eid = str(uuid.uuid4()) 
+    evento = { 
+            "id": eid, 
+            "turma_id": turma["id"], 
+            "criado_por": usuario["id"], 
+            "nome": nome, 
+            "data": data, 
+            "descricao": descricao, 
+            "condicoes": { 
+                "aberto": aberto, 
+                "cursos_permitidos": cursos_perm, 
+            }, 
+            "participantes": [usuario["id"]], } 
+    
+    db["eventos"].append(evento) 
+    
+    u = achar_usuario_id(db, usuario["id"]) 
+    u["eventos_inscritos"].append(eid) 
+    usuario["eventos_inscritos"].append(eid)
+    
+    db_salvar(db) 
+    
+    print(f"\n Evento '{nome}' criado!") 
+    
+    pausar()   
