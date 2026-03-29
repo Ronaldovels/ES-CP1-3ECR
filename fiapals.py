@@ -448,3 +448,43 @@ def tela_inscrever(usuario):
     else:
         print("\n  Cancelado.")
     pausar()
+
+# ─────────────────────────────────────────
+#  MENU PRINCIPAL
+# ─────────────────────────────────────────
+
+def menu_principal(usuario):
+    while True:
+        cabecalho(f"Ola, {usuario['nome']}")
+        print(f"  {usuario['curso']} - {usuario['ano']}o ano\n")
+        op = menu(["Meu Perfil", "Minha Turma", "Explorar", "Sair"])
+        if op == 1:
+            tela_perfil(usuario)
+        elif op == 2:
+            tela_turma(usuario)
+        elif op == 3:
+            tela_explorar(usuario)
+        else:
+            break
+
+# ─────────────────────────────────────────
+#  INICIO
+# ─────────────────────────────────────────
+
+def main():
+    while True:
+        cabecalho()
+        print("\n  Bem-vindo(a) ao FiaPals!\n")
+        op = menu(["Login", "Criar conta", "Sair"])
+        if op == 1:
+            usuario = fazer_login()
+            if usuario:
+                menu_principal(usuario)
+        elif op == 2:
+            cadastrar()
+        else:
+            print("\n  Ate logo!\n")
+            break
+
+if __name__ == "__main__":
+    main()
