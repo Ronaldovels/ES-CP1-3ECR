@@ -172,6 +172,9 @@ def fazer_login():
         print("\n  E-mail ou senha incorretos.")
         pausar()
         return None
+    print(f"\n  Bem-vindo(a), {u['nome']}!")
+    pausar()
+    return u
 
 #─────────────────────────────────────────
 #PERFIL
@@ -224,9 +227,7 @@ def tela_perfil(usuario):
 
         else:
             break
-    print(f"\n  Bem-vindo(a), {u['nome']}!")
-    pausar()
-    return u
+
 
 # ─────────────────────────────────────────
 #  TURMA
