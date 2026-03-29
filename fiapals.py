@@ -3,9 +3,9 @@ FiaPals - Rede Social da FIAP
 Execute: python fiapals.py
 """
 
+import hashlib
 import json
 import os
-import hashlib
 import uuid
 from datetime import datetime
 
@@ -28,26 +28,31 @@ ANOS = [1, 2, 3, 4]
 #  BANCO DE DADOS (JSON)
 # ─────────────────────────────────────────
 
+
 def db_carregar():
     if not os.path.exists(DB_PATH):
         db = {"usuarios": [], "turmas": [], "eventos": []}
         for curso in CURSOS:
             for ano in ANOS:
-                db["turmas"].append({
-                    "id": f"{curso.lower().replace(' ', '-')}-{ano}ano",
-                    "curso": curso,
-                    "ano": ano,
-                    "membros": [],
-                    "posts": [],
-                })
+                db["turmas"].append(
+                    {
+                        "id": f"{curso.lower().replace(' ', '-')}-{ano}ano",
+                        "curso": curso,
+                        "ano": ano,
+                        "membros": [],
+                        "posts": [],
+                    }
+                )
         db_salvar(db)
         return db
     with open(DB_PATH, "r", encoding="utf-8") as f:
         return json.load(f)
 
+
 def db_salvar(db):
     with open(DB_PATH, "w", encoding="utf-8") as f:
         json.dump(db, f, ensure_ascii=False, indent=2)
+
 
 def achar_usuario(db, email):
     for u in db["usuarios"]:
@@ -55,11 +60,13 @@ def achar_usuario(db, email):
             return u
     return None
 
+
 def achar_usuario_id(db, uid):
     for u in db["usuarios"]:
         if u["id"] == uid:
             return u
     return None
+
 
 def achar_turma(db, curso, ano):
     tid = f"{curso.lower().replace(' ', '-')}-{ano}ano"
@@ -67,6 +74,7 @@ def achar_turma(db, curso, ano):
         if t["id"] == tid:
             return t
     return None
+
 
 def achar_evento(db, evento_id):
     for e in db["eventos"]:
@@ -81,6 +89,7 @@ def achar_evento(db, evento_id):
 def limpar():
     os.system("cls" if os.name == "nt" else "clear")
 
+
 def cabecalho(sub=""):
     limpar()
     print("=" * 45)
@@ -88,6 +97,7 @@ def cabecalho(sub=""):
     if sub:
         print(f"  > {sub}")
     print("=" * 45)
+
 
 def menu(opcoes):
     for i, op in enumerate(opcoes, 1):
@@ -98,6 +108,7 @@ def menu(opcoes):
             return int(r)
         print("  Opcao invalida.")
 
+
 def pegar(label, vazio_ok=False):
     while True:
         v = input(f"  {label}: ").strip()
@@ -105,8 +116,10 @@ def pegar(label, vazio_ok=False):
             return v
         print("  Campo obrigatorio.")
 
+
 def pausar():
     input("\n  [Enter para continuar]")
+
 
 def escolher_lista(titulo, opcoes):
     print(f"\n  {titulo}")
@@ -118,40 +131,48 @@ def escolher_lista(titulo, opcoes):
             return opcoes[int(r) - 1]
         print("  Opcao invalida.")
 
+
 # ─────────────────────────────────────────
 # AUTENTICACAO
 # ─────────────────────────────────────────
 def hash_senha(s):
     return hashlib.sha256(s.encode()).hexdigest()
 
+
 def cadastrar():
     cabecalho("Criar conta")
-    nome  = pegar("Nome")
+    nome = pegar("Nome")
     email = pegar("E-mail")
     senha = pegar("Senha (min. 4 caracteres)")
 
     db = db_carregar()
 
     if len(senha) < 4:
-        print("\n  Senha muito curta."); pausar(); return
+        print("\n  Senha muito curta.")
+        pausar()
+        return
     if achar_usuario(db, email):
-        print("\n  E-mail ja cadastrado."); pausar(); return
+        print("\n  E-mail ja cadastrado.")
+        pausar()
+        return
 
     curso = escolher_lista("Seu curso:", CURSOS)
-    ano   = int(escolher_lista("Seu ano:", [f"{a}o ano" for a in ANOS])[0])
+    ano = int(escolher_lista("Seu ano:", [f"{a}o ano" for a in ANOS])[0])
 
     uid = str(uuid.uuid4())
-    db["usuarios"].append({
-        "id": uid,
-        "nome": nome,
-        "email": email.lower(),
-        "senha_hash": hash_senha(senha),
-        "curso": curso,
-        "ano": ano,
-        "bio": "",
-        "interesses": [],
-        "eventos_inscritos": [],
-    })
+    db["usuarios"].append(
+        {
+            "id": uid,
+            "nome": nome,
+            "email": email.lower(),
+            "senha_hash": hash_senha(senha),
+            "curso": curso,
+            "ano": ano,
+            "bio": "",
+            "interesses": [],
+            "eventos_inscritos": [],
+        }
+    )
 
     turma = achar_turma(db, curso, ano)
     if turma:
@@ -160,6 +181,7 @@ def cadastrar():
     db_salvar(db)
     print(f"\n  Conta criada! Voce entrou na turma de {curso} - {ano}o ano.")
     pausar()
+
 
 def fazer_login():
     cabecalho("Login")
@@ -173,9 +195,14 @@ def fazer_login():
         pausar()
         return None
 
-#─────────────────────────────────────────
-#PERFIL
-#─────────────────────────────────────────
+    print(f"\n  Bem-vindo(a), {u['nome']}!")
+    pausar()
+    return u
+
+
+# ─────────────────────────────────────────
+# PERFIL
+# ─────────────────────────────────────────
 def tela_perfil(usuario):
     while True:
         cabecalho("Meu Perfil")
@@ -224,13 +251,12 @@ def tela_perfil(usuario):
 
         else:
             break
-    print(f"\n  Bem-vindo(a), {u['nome']}!")
-    pausar()
-    return u
+
 
 # ─────────────────────────────────────────
 #  TURMA
 # ─────────────────────────────────────────
+
 
 def tela_turma(usuario):
     while True:
@@ -238,8 +264,16 @@ def tela_turma(usuario):
         turma = achar_turma(db, usuario["curso"], usuario["ano"])
         cabecalho(f"Turma: {turma['curso']} - {turma['ano']}o ano")
         print()
-        op = menu(["Ver membros", "Ver feed", "Publicar post",
-                   "Ver eventos da turma", "Criar evento", "Voltar"])
+        op = menu(
+            [
+                "Ver membros",
+                "Ver feed",
+                "Publicar post",
+                "Ver eventos da turma",
+                "Criar evento",
+                "Voltar",
+            ]
+        )
 
         if op == 1:
             cabecalho("Membros")
@@ -249,7 +283,11 @@ def tela_turma(usuario):
                 for uid in turma["membros"]:
                     u = achar_usuario_id(db, uid)
                     if u:
-                        inter = f" | {', '.join(u['interesses'])}" if u["interesses"] else ""
+                        inter = (
+                            f" | {', '.join(u['interesses'])}"
+                            if u["interesses"]
+                            else ""
+                        )
                         print(f"  * {u['nome']}{inter}")
             pausar()
 
@@ -273,12 +311,14 @@ def tela_turma(usuario):
             if len(texto) > 500:
                 print("\n  Post muito longo (max 500 caracteres).")
             else:
-                turma["posts"].append({
-                    "id": str(uuid.uuid4()),
-                    "autor_id": usuario["id"],
-                    "conteudo": texto,
-                    "data": datetime.now().strftime("%d/%m/%Y %H:%M"),
-                })
+                turma["posts"].append(
+                    {
+                        "id": str(uuid.uuid4()),
+                        "autor_id": usuario["id"],
+                        "conteudo": texto,
+                        "data": datetime.now().strftime("%d/%m/%Y %H:%M"),
+                    }
+                )
                 db_salvar(db)
                 print("\n  Post publicado!")
             pausar()
@@ -302,74 +342,81 @@ def tela_turma(usuario):
 
         else:
             break
-        
-def tela_criar_evento(usuario): 
-    
-    cabecalho("Criar Evento") 
-    nome = pegar("Nome do evento") 
-    data = pegar("Data (DD/MM/AAAA)") 
-    descricao = pegar("Descricao") 
-    
+
+
+def tela_criar_evento(usuario):
+
+    cabecalho("Criar Evento")
+    nome = pegar("Nome do evento")
+    data = pegar("Data (DD/MM/AAAA)")
+    descricao = pegar("Descricao")
+
     # Valida data
-    try: 
-        datetime.strptime(data, "%d/%m/%Y") 
-    except ValueError: 
-        print("\n Data invalida. Use DD/MM/AAAA.") 
-        pausar() 
-        return 
-    
-    print("\n Quem pode participar?") 
-    tipo = menu(["Aberto para todos", "So alunos do meu curso", "So minha turma"]) 
-    
-    aberto = False 
-    cursos_perm = [] 
-    
-    
-    if tipo == 1: 
-        aberto = True 
-    elif tipo == 2: 
-        cursos_perm = [usuario["curso"]] 
-    # tipo 3 = lista vazia = so turma 
-    
-    
+    try:
+        datetime.strptime(data, "%d/%m/%Y")
+    except ValueError:
+        print("\n Data invalida. Use DD/MM/AAAA.")
+        pausar()
+        return
+
+    print("\n Quem pode participar?")
+    tipo = menu(["Aberto para todos", "So alunos do meu curso", "So minha turma"])
+
+    aberto = False
+    cursos_perm = []
+
+    if tipo == 1:
+        aberto = True
+    elif tipo == 2:
+        cursos_perm = [usuario["curso"]]
+
     db = db_carregar()
-    turma = achar_turma(db, usuario["curso"], usuario["ano"]) 
-    eid = str(uuid.uuid4()) 
-    evento = { 
-            "id": eid, 
-            "turma_id": turma["id"], 
-            "criado_por": usuario["id"], 
-            "nome": nome, 
-            "data": data, 
-            "descricao": descricao, 
-            "condicoes": { 
-                "aberto": aberto, 
-                "cursos_permitidos": cursos_perm, 
-            }, 
-            "participantes": [usuario["id"]], } 
-    
-    db["eventos"].append(evento) 
-    
-    u = achar_usuario_id(db, usuario["id"]) 
-    u["eventos_inscritos"].append(eid) 
+    turma = achar_turma(db, usuario["curso"], usuario["ano"])
+    eid = str(uuid.uuid4())
+    evento = {
+        "id": eid,
+        "turma_id": turma["id"],
+        "criado_por": usuario["id"],
+        "nome": nome,
+        "data": data,
+        "descricao": descricao,
+        "condicoes": {
+            "aberto": aberto,
+            "cursos_permitidos": cursos_perm,
+        },
+        "participantes": [usuario["id"]],
+    }
+
+    db["eventos"].append(evento)
+
+    u = achar_usuario_id(db, usuario["id"])
+    u["eventos_inscritos"].append(eid)
     usuario["eventos_inscritos"].append(eid)
-    
-    db_salvar(db) 
-    
-    print(f"\n Evento '{nome}' criado!") 
+
+    db_salvar(db)
+
+    print(f"\n Evento '{nome}' criado!")
 
     pausar()
+
 
 # ─────────────────────────────────────────
 #  EXPLORAR
 # ─────────────────────────────────────────
 
+
 def tela_explorar(usuario):
     while True:
         cabecalho("Explorar FiaPals")
         print()
-        op = menu(["Ver todas as turmas", "Ver todos os eventos",
-                   "Entrar em um evento", "Voltar"])
+        op = menu(
+            [
+                "Ver todas as turmas",
+                "Ver todos os eventos",
+                "Entrar em um evento",
+                "Voltar",
+            ]
+        )
 
         if op == 1:
             cabecalho("Turmas")
@@ -389,11 +436,15 @@ def tela_explorar(usuario):
                 print("\n  Nenhum evento criado ainda.")
             else:
                 for e in db["eventos"]:
-                    t = next((x for x in db["turmas"] if x["id"] == e["turma_id"]), None)
+                    t = next(
+                        (x for x in db["turmas"] if x["id"] == e["turma_id"]), None
+                    )
                     turma_nome = f"{t['curso']} {t['ano']}o ano" if t else "?"
                     rest = "Aberto" if e["condicoes"]["aberto"] else "Restrito"
                     print(f"\n  [{e['id'][:6]}] {e['nome']} — {e['data']}")
-                    print(f"  Turma: {turma_nome} | {rest} | {len(e['participantes'])} inscrito(s)")
+                    print(
+                        f"  Turma: {turma_nome} | {rest} | {len(e['participantes'])} inscrito(s)"
+                    )
                     print(f"  {e['descricao']}")
             pausar()
 
@@ -402,6 +453,7 @@ def tela_explorar(usuario):
 
         else:
             break
+
 
 def tela_inscrever(usuario):
     cabecalho("Inscrever em Evento")
@@ -432,12 +484,19 @@ def tela_inscrever(usuario):
     # Valida condicoes
     cond = evento["condicoes"]
     if not cond["aberto"]:
-        if cond["cursos_permitidos"] and usuario["curso"] not in cond["cursos_permitidos"]:
-            print(f"\n  Este evento e restrito ao curso: {', '.join(cond['cursos_permitidos'])}")
+        if (
+            cond["cursos_permitidos"]
+            and usuario["curso"] not in cond["cursos_permitidos"]
+        ):
+            print(
+                f"\n  Este evento e restrito ao curso: {', '.join(cond['cursos_permitidos'])}"
+            )
             pausar()
             return
 
-    confirma = input(f"\n  Confirmar inscricao em '{evento['nome']}'? (s/n): ").strip().lower()
+    confirma = (
+        input(f"\n  Confirmar inscricao em '{evento['nome']}'? (s/n): ").strip().lower()
+    )
     if confirma == "s":
         evento["participantes"].append(usuario["id"])
         u = achar_usuario_id(db, usuario["id"])
@@ -448,3 +507,45 @@ def tela_inscrever(usuario):
     else:
         print("\n  Cancelado.")
     pausar()
+
+
+# ─────────────────────────────────────────
+# MENU PRINCIPAL
+# ─────────────────────────────────────────
+def menu_principal(usuario):
+    while True:
+        cabecalho(f"Ola, {usuario['nome']}")
+        print(f" {usuario['curso']} - {usuario['ano']}o ano\n")
+        op = menu(["Meu Perfil", "Minha Turma", "Explorar", "Sair"])
+        if op == 1:
+            tela_perfil(usuario)
+        elif op == 2:
+            tela_turma(usuario)
+        elif op == 3:
+            tela_explorar(usuario)
+        else:
+            break
+
+
+# ─────────────────────────────────────────
+# INICIO
+# ─────────────────────────────────────────
+def main():
+    while True:
+        cabecalho()
+        print("\n Bem-vindo(a) ao FiaPals!\n")
+        op = menu(["Login", "Criar conta", "Sair"])
+
+        if op == 1:
+            usuario = fazer_login()
+            if usuario:
+                menu_principal(usuario)
+        elif op == 2:
+            cadastrar()
+        else:
+            print("\n Ate logo!\n")
+            break
+
+
+if __name__ == "__main__":
+    main()
