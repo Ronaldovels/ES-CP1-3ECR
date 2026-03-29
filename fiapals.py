@@ -194,7 +194,6 @@ def fazer_login():
         print("\n  E-mail ou senha incorretos.")
         pausar()
         return None
-
     print(f"\n  Bem-vindo(a), {u['nome']}!")
     pausar()
     return u
@@ -369,6 +368,7 @@ def tela_criar_evento(usuario):
         aberto = True
     elif tipo == 2:
         cursos_perm = [usuario["curso"]]
+    # tipo 3 = lista vazia = so turma
 
     db = db_carregar()
     turma = achar_turma(db, usuario["curso"], usuario["ano"])
@@ -510,12 +510,14 @@ def tela_inscrever(usuario):
 
 
 # ─────────────────────────────────────────
-# MENU PRINCIPAL
+#  MENU PRINCIPAL
 # ─────────────────────────────────────────
+
+
 def menu_principal(usuario):
     while True:
         cabecalho(f"Ola, {usuario['nome']}")
-        print(f" {usuario['curso']} - {usuario['ano']}o ano\n")
+        print(f"  {usuario['curso']} - {usuario['ano']}o ano\n")
         op = menu(["Meu Perfil", "Minha Turma", "Explorar", "Sair"])
         if op == 1:
             tela_perfil(usuario)
@@ -528,14 +530,15 @@ def menu_principal(usuario):
 
 
 # ─────────────────────────────────────────
-# INICIO
+#  INICIO
 # ─────────────────────────────────────────
+
+
 def main():
     while True:
         cabecalho()
-        print("\n Bem-vindo(a) ao FiaPals!\n")
+        print("\n  Bem-vindo(a) ao FiaPals!\n")
         op = menu(["Login", "Criar conta", "Sair"])
-
         if op == 1:
             usuario = fazer_login()
             if usuario:
@@ -543,7 +546,7 @@ def main():
         elif op == 2:
             cadastrar()
         else:
-            print("\n Ate logo!\n")
+            print("\n  Ate logo!\n")
             break
 
 
