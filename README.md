@@ -59,5 +59,5 @@ README.md          # Documentação do projeto
 - Vitor Pantarotto (RM554961)
 
 ## 🔗 Links (Miro, repositório, vídeo)
-- [Miro do Projeto](#https://miro.com/app/board/uXjVGq5bml8=/?share_link_id=636166193571)
-- [Repositório no GitHub](#https://github.com/Ronaldovels/ES-CP1-3ECR)
+- [Miro do Projeto](https://miro.com/app/board/uXjVGq5bml8=/?share_link_id=636166193571)
+- [Repositório no GitHub](https://github.com/Ronaldovels/ES-CP1-3ECR)
