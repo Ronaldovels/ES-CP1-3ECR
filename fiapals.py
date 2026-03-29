@@ -357,5 +357,94 @@ def tela_criar_evento(usuario):
     db_salvar(db) 
     
     print(f"\n Evento '{nome}' criado!") 
-    
-    pausar()   
+
+    pausar()
+
+# ─────────────────────────────────────────
+#  EXPLORAR
+# ─────────────────────────────────────────
+
+def tela_explorar(usuario):
+    while True:
+        cabecalho("Explorar FiaPals")
+        print()
+        op = menu(["Ver todas as turmas", "Ver todos os eventos",
+                   "Entrar em um evento", "Voltar"])
+
+        if op == 1:
+            cabecalho("Turmas")
+            db = db_carregar()
+            curso_atual = ""
+            for t in db["turmas"]:
+                if t["curso"] != curso_atual:
+                    curso_atual = t["curso"]
+                    print(f"\n  {curso_atual}")
+                print(f"    {t['ano']}o ano — {len(t['membros'])} aluno(s)")
+            pausar()
+
+        elif op == 2:
+            cabecalho("Eventos")
+            db = db_carregar()
+            if not db["eventos"]:
+                print("\n  Nenhum evento criado ainda.")
+            else:
+                for e in db["eventos"]:
+                    t = next((x for x in db["turmas"] if x["id"] == e["turma_id"]), None)
+                    turma_nome = f"{t['curso']} {t['ano']}o ano" if t else "?"
+                    rest = "Aberto" if e["condicoes"]["aberto"] else "Restrito"
+                    print(f"\n  [{e['id'][:6]}] {e['nome']} — {e['data']}")
+                    print(f"  Turma: {turma_nome} | {rest} | {len(e['participantes'])} inscrito(s)")
+                    print(f"  {e['descricao']}")
+            pausar()
+
+        elif op == 3:
+            tela_inscrever(usuario)
+
+        else:
+            break
+
+def tela_inscrever(usuario):
+    cabecalho("Inscrever em Evento")
+    db = db_carregar()
+    if not db["eventos"]:
+        print("\n  Nenhum evento disponivel.")
+        pausar()
+        return
+
+    for e in db["eventos"]:
+        rest = "Aberto" if e["condicoes"]["aberto"] else "Restrito"
+        print(f"  [{e['id'][:6]}] {e['nome']} — {e['data']} | {rest}")
+
+    print()
+    codigo = pegar("Digite os 6 primeiros caracteres do ID")
+    evento = next((e for e in db["eventos"] if e["id"].startswith(codigo)), None)
+
+    if not evento:
+        print("\n  Evento nao encontrado.")
+        pausar()
+        return
+
+    if usuario["id"] in evento["participantes"]:
+        print("\n  Voce ja esta inscrito neste evento.")
+        pausar()
+        return
+
+    # Valida condicoes
+    cond = evento["condicoes"]
+    if not cond["aberto"]:
+        if cond["cursos_permitidos"] and usuario["curso"] not in cond["cursos_permitidos"]:
+            print(f"\n  Este evento e restrito ao curso: {', '.join(cond['cursos_permitidos'])}")
+            pausar()
+            return
+
+    confirma = input(f"\n  Confirmar inscricao em '{evento['nome']}'? (s/n): ").strip().lower()
+    if confirma == "s":
+        evento["participantes"].append(usuario["id"])
+        u = achar_usuario_id(db, usuario["id"])
+        u["eventos_inscritos"].append(evento["id"])
+        usuario["eventos_inscritos"].append(evento["id"])
+        db_salvar(db)
+        print("\n  Inscricao confirmada!")
+    else:
+        print("\n  Cancelado.")
+    pausar()
