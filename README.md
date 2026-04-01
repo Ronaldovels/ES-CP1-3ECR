@@ -43,13 +43,19 @@ O FiaPals é uma rede social exclusiva para alunos da FIAP, permitindo criar per
 
 ## 📸 Demonstração (prints / GIFs / link para vídeo)
 
-<img src="https://cdn.discordapp.com/attachments/1425509368123752461/1487842318865404005/image.png?ex=69ca9ca3&is=69c94b23&hm=f1639bc9b6f22bda5bd390858299d3ed3b6011fea8bf0d7a6ededd0434d47207&" alt="Tela 1" width="300">
-<img src="https://cdn.discordapp.com/attachments/1425509368123752461/1487842638806913054/image.png?ex=69ca9cef&is=69c94b6f&hm=49d4adb49875426dfe3d080d272a5d01fa8d6c13a5030b2c0708284a2df1f4e1&" alt="Tela 2" width="300">
-<img src="https://cdn.discordapp.com/attachments/1425509368123752461/1487842899982028822/image.png?ex=69ca9d2e&is=69c94bae&hm=b7f9febc2546165a604fbae3af86192fd27eeaa7b3991d39d8553425fe3f6bd9&" alt="Tela 3" width="300">
-<img src="https://cdn.discordapp.com/attachments/1425509368123752461/1487842900430684270/image.png?ex=69ca9d2e&is=69c94bae&hm=2add59410da3041437aa917f0965616add427cc6dc5973f11eccd41b50a9b1af&" alt="Tela 4" width="300">
-<img src="https://cdn.discordapp.com/attachments/1425509368123752461/1487842900724416522/image.png?ex=69ca9d2e&is=69c94bae&hm=3e9723121dc0870148ebbf21e429fb8c6b206ba39a6dca71171b8e475cea5446&" alt="Tela 5" width="300">
-<img src="https://cdn.discordapp.com/attachments/1425509368123752461/1487843201539637440/image.png?ex=69ca9d76&is=69c94bf6&hm=1863c9bfb13a76a20925c413ce53990cab6ef05dfa515c5dacf0fc5879ae36df&" alt="Tela 6" width="300">
-<img src="https://cdn.discordapp.com/attachments/1425509368123752461/1487843308913819799/image.png?ex=69ca9d8f&is=69c94c0f&hm=d03ace60ea794981ea7beb3b9ddcd8c8bdd18d51479643a566f20570635433ea&" alt="Tela 7" width="300">
+<img src="https://cdn.discordapp.com/attachments/1213118700169990145/1488964244601966612/image.png" width="300">
+<img src="https://cdn.discordapp.com/attachments/1213118700169990145/1488964282614943854/image.png" width="300">
+<img src="https://cdn.discordapp.com/attachments/1213118700169990145/1488964339028328478/image.png" width="300">
+<img src="https://cdn.discordapp.com/attachments/1213118700169990145/1488964375174713556/image.png" width="300">
+<img src="https://cdn.discordapp.com/attachments/1213118700169990145/1488964408091607311/image.png" width="300">
+<img src="https://cdn.discordapp.com/attachments/1213118700169990145/1488964436877115606/image.png" width="300">
+<img src="https://cdn.discordapp.com/attachments/1213118700169990145/1488964478006464603/image.png" width="300">
+<img src="https://cdn.discordapp.com/attachments/1213118700169990145/1488964513033097326/image.png" width="300">
+<img src="https://cdn.discordapp.com/attachments/1213118700169990145/1488964575981211869/image.png" width="300">
+<img src="https://cdn.discordapp.com/attachments/1213118700169990145/1488964601944084531/image.png" width="300">
+<img src="https://cdn.discordapp.com/attachments/1213118700169990145/1488964632164040704/image.png" width="300">
+<img src="https://cdn.discordapp.com/attachments/1213118700169990145/1488964671003295865/image.png" width="300">
+<img src="https://cdn.discordapp.com/attachments/1213118700169990145/1488964713717960845/image.png" width="300">
 
 ## 👨‍💻 Integrantes do Grupo
 - Ana Luiza Dourado (RM558793)
