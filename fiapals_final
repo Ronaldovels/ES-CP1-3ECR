@@ -1,0 +1,35 @@
+"""
+FiaPals - Backend Flask
+Execute: pip install flask flask-cors && python app.py
+Acesse:  http://localhost:5000
+"""
+
+from flask import Flask, request, jsonify, session, send_from_directory
+from flask_cors import CORS
+import json, os, hashlib, uuid
+from datetime import datetime
+from werkzeug.utils import secure_filename
+
+BASE_DIR   = os.path.dirname(os.path.abspath(__file__))
+UPLOAD_DIR = os.path.join(BASE_DIR, "uploads")
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+
+ALLOWED_EXT = {"png", "jpg", "jpeg", "gif", "webp"}
+MAX_MB      = 8
+
+app = Flask(__name__)
+app.secret_key = "fiapals-secret-key-2024"
+app.config["MAX_CONTENT_LENGTH"] = MAX_MB * 1024 * 1024
+CORS(app, supports_credentials=True)
+
+DB_PATH = os.path.join(BASE_DIR, "fiapals_db.json")
+
+CURSOS = [
+    "Engenharia de Software", "Engenharia da Computacao",
+    "Ciencia da Computacao", "Sistemas de Informacao",
+    "Design Digital", "Analise e Desenvolvimento de Sistemas",
+    "Inteligencia Artificial", "Ciberseguranca",
+]
+ANOS = [1, 2, 3, 4]
+
+# ── DB ──────────────────────────────────────────────
