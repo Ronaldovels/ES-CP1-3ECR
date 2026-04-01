@@ -21,7 +21,7 @@ O FiaPals é uma rede social exclusiva para alunos da FIAP, permitindo criar per
 4. Acesse a aplicação pelo navegador no endereço local configurado.
 
 ## 📂 Estrutura do Projeto
-- `app.py` — arquivo principal do backend da aplicação
+- `fiapals.py` — arquivo principal do backend da aplicação
 - `index.html` — interface principal da aplicação
 - `fiapals_db.json` — banco de dados gerado automaticamente em JSON
 - `uploads/` — diretório para armazenamento das imagens enviadas
