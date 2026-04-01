@@ -225,3 +225,118 @@ def atualizar_perfil():
     db_salvar(db)
     return jsonify({"usuario": _pub(usr)})
 
+# ===== FUNÇÃO: meus_posts =====
+@app.route("/api/perfil/posts")
+def meus_posts():
+    u = usuario_logado()
+    if not u:
+        return jsonify({"erro": "Não autenticado."}), 401
+    db = db_carregar()
+    resultado = []
+    for turma in db["turmas"]:
+        for p in turma.get("posts", []):
+            if p["autor_id"] == u["id"]:
+                resultado.append({
+                    **p,
+                    "autor_nome": u["nome"],
+                    "turma_nome": f"{turma['curso']} {turma['ano']}º ano"
+                })
+    resultado.sort(key=lambda x: x["data"], reverse=True)
+    return jsonify({"posts": resultado[:30]})
+
+# ── SEGUIR ──────────────────────────────────────────
+
+
+# ===== FUNÇÃO: seguir =====
+@app.route("/api/seguir/<alvo_id>", methods=["POST"])
+def seguir(alvo_id):
+    u = usuario_logado()
+    if not u:
+        return jsonify({"erro": "Não autenticado."}), 401
+    if u["id"] == alvo_id:
+        return jsonify({"erro": "Você não pode seguir a si mesmo."}), 400
+    db  = db_carregar()
+    usr = achar_usuario_id(db, u["id"])
+    if alvo_id not in usr.get("seguindo", []):
+        usr.setdefault("seguindo", []).append(alvo_id)
+        db_salvar(db)
+    return jsonify({"ok": True, "seguindo": True})
+
+
+# ===== FUNÇÃO: deixar_seguir =====
+@app.route("/api/seguir/<alvo_id>", methods=["DELETE"])
+def deixar_seguir(alvo_id):
+    u = usuario_logado()
+    if not u:
+        return jsonify({"erro": "Não autenticado."}), 401
+    db  = db_carregar()
+    usr = achar_usuario_id(db, u["id"])
+    usr["seguindo"] = [x for x in usr.get("seguindo", []) if x != alvo_id]
+    db_salvar(db)
+    return jsonify({"ok": True, "seguindo": False})
+
+# ── FEED GERAL (pessoas que sigo) ───────────────────
+
+
+# ===== FUNÇÃO: feed_geral =====
+@app.route("/api/feed/geral")
+def feed_geral():
+    u = usuario_logado()
+    if not u:
+        return jsonify({"erro": "Não autenticado."}), 401
+    db       = db_carregar()
+    seguindo = set(u.get("seguindo", []))
+    resultado = []
+    for turma in db["turmas"]:
+        for p in turma.get("posts", []):
+            if p["autor_id"] in seguindo:
+                autor = achar_usuario_id(db, p["autor_id"])
+                resultado.append({
+                    **p,
+                    "autor_nome": autor["nome"] if autor else "?",
+                    "turma_nome": f"{turma['curso']} {turma['ano']}º ano"
+                })
+    resultado.sort(key=lambda x: x["data"], reverse=True)
+    return jsonify({"posts": resultado[:40]})
+
+# ── TURMA ───────────────────────────────────────────
+
+
+# ===== FUNÇÃO: minha_turma =====
+@app.route("/api/turma")
+def minha_turma():
+    u = usuario_logado()
+    if not u:
+        return jsonify({"erro": "Não autenticado."}), 401
+    db    = db_carregar()
+    turma = achar_turma(db, u["curso"], u["ano"])
+    if not turma:
+        return jsonify({"erro": "Turma não encontrada."}), 404
+    membros = [_pub(achar_usuario_id(db, mid)) for mid in turma["membros"] if achar_usuario_id(db, mid)]
+    return jsonify({
+        "id": turma["id"], "curso": turma["curso"], "ano": turma["ano"],
+        "membros": membros, "total_posts": len(turma.get("posts", []))
+    })
+
+
+# ===== FUNÇÃO: feed_turma =====
+@app.route("/api/turma/feed")
+def feed_turma():
+    u = usuario_logado()
+    if not u:
+        return jsonify({"erro": "Não autenticado."}), 401
+    db    = db_carregar()
+    turma = achar_turma(db, u["curso"], u["ano"])
+    posts = list(reversed(turma.get("posts", [])[-40:]))
+    resultado = []
+    for p in posts:
+        autor = achar_usuario_id(db, p["autor_id"])
+        resultado.append({
+            "id": p["id"],
+            "conteudo": p.get("conteudo", ""),
+            "foto_url": p.get("foto_url"),
+            "data": p["data"],
+            "autor_nome": autor["nome"] if autor else "?",
+            "autor_id": p["autor_id"],
+        })
+    return jsonify({"posts": resultado})
