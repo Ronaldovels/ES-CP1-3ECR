@@ -1,0 +1,1278 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FiaPals</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --red:#E8291C;--red-hover:#c9200f;--red-soft:#fdf1f0;
+  --black:#111111;--white:#ffffff;
+  --gray-50:#fafafa;--gray-100:#f4f4f4;--gray-200:#e8e8e8;
+  --gray-400:#a0a0a0;--gray-600:#666666;
+  --radius:14px;--radius-sm:8px;
+  --shadow:0 2px 12px rgba(0,0,0,.07);--shadow-md:0 4px 24px rgba(0,0,0,.1);
+  --font:'DM Sans',sans-serif;
+}
+html.dark{--red-soft:#2a1210;--black:#f0f0f0;--white:#1a1a1a;--gray-50:#141414;--gray-100:#222222;--gray-200:#2e2e2e;--gray-400:#666666;--gray-600:#888888;--shadow:0 2px 12px rgba(0,0,0,.4);--shadow-md:0 4px 24px rgba(0,0,0,.5);}
+html.dark .auth-left{background:#0d0d0d;}
+html.dark .auth-switch-btn.active{background:#2e2e2e;box-shadow:none;}
+html.dark .topbar{background:rgba(26,26,26,.92);}
+html.dark .composer textarea,html.dark .field input,html.dark .field select{background:var(--white);color:var(--black);}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--font);background:var(--gray-50);color:var(--black);min-height:100vh;-webkit-font-smoothing:antialiased;}
+
+/* AUTH */
+#auth-screen{min-height:100vh;display:flex;background:var(--white);}
+.auth-left{flex:1;background:var(--black);display:flex;flex-direction:column;justify-content:center;padding:64px;position:relative;overflow:hidden;}
+.auth-left::after{content:'';position:absolute;bottom:-80px;right:-80px;width:320px;height:320px;background:var(--red);border-radius:50%;opacity:.12;}
+.auth-left::before{content:'';position:absolute;top:-60px;left:-60px;width:200px;height:200px;background:var(--red);border-radius:50%;opacity:.06;}
+.auth-brand{position:relative;z-index:1;}
+.brand-dot{width:10px;height:10px;background:var(--red);border-radius:50%;display:inline-block;margin-right:10px;vertical-align:middle;}
+.brand-label{color:var(--gray-400);font-size:13px;font-weight:500;}
+.brand-name{color:var(--white);font-size:clamp(48px,6vw,80px);font-weight:700;line-height:1;margin-top:16px;letter-spacing:-2px;}
+.brand-name span{color:var(--red);}
+.brand-sub{color:var(--gray-600);font-size:16px;margin-top:16px;line-height:1.6;max-width:280px;}
+.auth-pills{display:flex;gap:8px;margin-top:40px;flex-wrap:wrap;}
+.auth-pill{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);color:var(--gray-400);font-size:12px;padding:6px 14px;border-radius:100px;font-weight:500;}
+.auth-right{width:480px;display:flex;flex-direction:column;justify-content:center;padding:64px 52px;}
+.auth-right-title{font-size:26px;font-weight:700;letter-spacing:-.5px;margin-bottom:6px;}
+.auth-right-sub{color:var(--gray-600);font-size:14px;margin-bottom:32px;}
+.auth-switcher{display:flex;background:var(--gray-100);border-radius:var(--radius-sm);padding:4px;margin-bottom:28px;}
+.auth-switch-btn{flex:1;background:none;border:none;padding:9px;font-family:var(--font);font-size:13px;font-weight:600;cursor:pointer;border-radius:6px;color:var(--gray-600);transition:all .2s;}
+.auth-switch-btn.active{background:var(--white);color:var(--black);box-shadow:0 1px 4px rgba(0,0,0,.1);}
+
+/* FORM */
+.field{margin-bottom:16px;}
+.field label{display:block;font-size:13px;font-weight:600;color:var(--black);margin-bottom:6px;}
+.field input,.field select{width:100%;padding:11px 16px;border:1.5px solid var(--gray-200);border-radius:var(--radius-sm);font-family:var(--font);font-size:14px;color:var(--black);background:var(--white);outline:none;transition:border-color .2s,box-shadow .2s;-webkit-appearance:none;appearance:none;}
+.field input:focus,.field select:focus{border-color:var(--red);box-shadow:0 0 0 3px rgba(232,41,28,.1);}
+.field select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7' fill='none'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23999' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px;cursor:pointer;}
+.fields-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.fields-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+.btn{width:100%;padding:13px;border:none;border-radius:var(--radius-sm);font-family:var(--font);font-size:14px;font-weight:600;cursor:pointer;transition:background .2s,transform .1s,box-shadow .2s;}
+.btn-primary{background:var(--red);color:var(--white);}
+.btn-primary:hover{background:var(--red-hover);box-shadow:0 4px 16px rgba(232,41,28,.3);}
+.btn-primary:active{transform:scale(.98);}
+.btn-ghost{background:var(--gray-100);color:var(--black);width:auto;padding:9px 18px;font-size:13px;}
+.btn-ghost:hover{background:var(--gray-200);}
+.btn-sm{padding:8px 16px;font-size:13px;width:auto;}
+.btn-outline{background:transparent;border:1.5px solid var(--gray-200);color:var(--black);width:auto;padding:8px 16px;font-size:13px;}
+.btn-outline:hover{border-color:var(--red);color:var(--red);}
+.msg{font-size:13px;padding:11px 14px;border-radius:var(--radius-sm);margin-bottom:14px;display:none;}
+.msg.show{display:block;}
+.msg-error{background:#fff1f0;color:#c0392b;border:1px solid #fac9c6;}
+.msg-success{background:#f0faf6;color:#1a7a52;border:1px solid #b8ecd8;}
+
+/* THEME */
+.theme-btn{width:36px;height:36px;border-radius:50%;border:1.5px solid var(--gray-200);background:var(--gray-100);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;transition:all .2s;flex-shrink:0;}
+.theme-btn:hover{border-color:var(--red);background:var(--red-soft);}
+.auth-theme-btn{position:fixed;top:18px;right:20px;z-index:50;}
+
+/* APP */
+#main-app{display:none;min-height:100vh;}
+.topbar{position:sticky;top:0;z-index:100;background:rgba(255,255,255,.9);backdrop-filter:blur(16px);border-bottom:1px solid var(--gray-200);display:flex;align-items:center;justify-content:space-between;padding:0 28px;height:60px;}
+.topbar-logo{font-size:20px;font-weight:700;letter-spacing:-.5px;color:var(--black);}
+.topbar-logo span{color:var(--red);}
+.topbar-right{display:flex;align-items:center;gap:14px;}
+.avatar{width:36px;height:36px;background:var(--black);color:var(--white);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;cursor:pointer;transition:opacity .15s,box-shadow .15s;}
+.avatar:hover{opacity:.85;box-shadow:0 0 0 3px rgba(232,41,28,.25);}
+.avatar-red{background:var(--red);}
+.topbar-name{font-size:14px;font-weight:500;}
+.topbar-logout{background:none;border:1.5px solid var(--gray-200);color:var(--gray-600);font-family:var(--font);font-size:13px;font-weight:500;padding:7px 14px;border-radius:var(--radius-sm);cursor:pointer;transition:all .2s;}
+.topbar-logout:hover{border-color:var(--red);color:var(--red);}
+.main-nav{background:var(--white);border-bottom:1px solid var(--gray-200);padding:0 28px;display:flex;gap:4px;}
+.nav-btn{background:none;border:none;font-family:var(--font);font-size:14px;font-weight:500;color:var(--gray-600);padding:16px 16px 14px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .2s;}
+.nav-btn:hover{color:var(--black);}
+.nav-btn.active{color:var(--red);border-bottom-color:var(--red);font-weight:600;}
+.wrap{max-width:960px;margin:0 auto;padding:32px 28px;}
+.page{display:none;animation:fadeUp .25s ease;}
+.page.active{display:block;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
+.pill-nav{display:flex;gap:6px;margin-bottom:24px;flex-wrap:wrap;}
+.pill-btn{background:var(--gray-100);border:none;font-family:var(--font);font-size:13px;font-weight:500;color:var(--gray-600);padding:8px 16px;border-radius:100px;cursor:pointer;transition:all .2s;}
+.pill-btn:hover{background:var(--gray-200);color:var(--black);}
+.pill-btn.active{background:var(--black);color:var(--white);}
+
+/* CARDS */
+.card{background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius);padding:24px;transition:box-shadow .2s;}
+.card:hover{box-shadow:var(--shadow);}
+.card+.card{margin-top:12px;}
+.chips-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px;}
+.chip{background:var(--gray-100);color:var(--black);font-size:12px;font-weight:500;padding:5px 12px;border-radius:100px;}
+.stats-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;}
+.stat-card{background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius);padding:20px 24px;}
+.stat-label{font-size:12px;font-weight:500;color:var(--gray-600);margin-bottom:6px;}
+.stat-value{font-size:36px;font-weight:700;letter-spacing:-2px;line-height:1;}
+.edit-row{display:flex;gap:10px;align-items:flex-end;}
+.edit-row .field{flex:1;margin:0;}
+
+/* FEED / POST */
+.composer{background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius);padding:20px;margin-bottom:20px;}
+.composer-top{display:flex;gap:14px;align-items:flex-start;}
+.composer-right{flex:1;display:flex;flex-direction:column;gap:10px;}
+.composer textarea{width:100%;border:1.5px solid var(--gray-200);border-radius:var(--radius-sm);font-family:var(--font);font-size:14px;color:var(--black);padding:12px 14px;resize:none;min-height:80px;outline:none;transition:border-color .2s;background:var(--white);}
+.composer textarea:focus{border-color:var(--red);}
+.composer-footer{display:flex;justify-content:space-between;align-items:center;gap:12px;}
+.char-count{font-size:12px;color:var(--gray-400);}
+.char-count.warn{color:var(--red);}
+.foto-preview{position:relative;display:none;}
+.foto-preview img{width:100%;max-height:220px;object-fit:cover;border-radius:var(--radius-sm);border:1px solid var(--gray-200);}
+.foto-preview-remove{position:absolute;top:8px;right:8px;background:rgba(0,0,0,.55);color:#fff;border:none;border-radius:50%;width:26px;height:26px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;}
+.attach-btn{background:none;border:1.5px solid var(--gray-200);border-radius:var(--radius-sm);color:var(--gray-600);font-family:var(--font);font-size:13px;padding:7px 14px;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .2s;}
+.attach-btn:hover{border-color:var(--red);color:var(--red);}
+
+.post-card{background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius);padding:20px;margin-bottom:12px;}
+.post-header{display:flex;align-items:center;gap:12px;margin-bottom:14px;}
+.post-avatar{width:40px;height:40px;background:var(--black);color:var(--white);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0;}
+.post-author{font-size:14px;font-weight:600;}
+.post-author-clickable{cursor:pointer;display:flex;align-items:center;gap:12px;transition:opacity .15s;}
+.post-author-clickable:hover{opacity:.75;}
+.member-card{cursor:pointer;transition:box-shadow .2s,border-color .2s;}
+.member-card:hover{box-shadow:var(--shadow-md);border-color:var(--gray-400);}
+.uprofile-av{width:64px;height:64px;background:var(--black);color:var(--white);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;margin:0 auto 16px;}
+.uprofile-name{font-size:20px;font-weight:700;letter-spacing:-.4px;text-align:center;}
+.uprofile-course{font-size:13px;color:var(--gray-600);text-align:center;margin-top:4px;}
+.uprofile-bio{font-size:14px;text-align:center;margin-top:8px;line-height:1.6;}
+.uprofile-chips{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:12px;}
+.post-date{font-size:12px;color:var(--gray-400);margin-top:1px;}
+.post-turma-badge{font-size:11px;color:var(--gray-400);margin-top:2px;}
+.post-body{font-size:14px;line-height:1.65;white-space:pre-wrap;}
+.post-img{width:100%;border-radius:var(--radius-sm);margin-top:14px;max-height:400px;object-fit:cover;border:1px solid var(--gray-200);}
+
+/* MEMBERS */
+.members-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;}
+.member-card{background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius);padding:20px;text-align:center;}
+.member-avatar{width:52px;height:52px;background:var(--black);color:var(--white);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;margin:0 auto 12px;}
+.member-name{font-size:14px;font-weight:600;}
+.member-bio{font-size:12px;color:var(--gray-600);margin-top:4px;line-height:1.5;}
+.member-actions{margin-top:12px;display:flex;justify-content:center;}
+
+/* EVENTS */
+.events-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;}
+.event-card{background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius);padding:24px;display:flex;flex-direction:column;transition:box-shadow .2s,border-color .2s;}
+.event-card:hover{box-shadow:var(--shadow-md);border-color:var(--gray-400);}
+.event-tag-row{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;}
+.badge{font-size:11px;font-weight:600;padding:4px 10px;border-radius:100px;}
+.badge-red{background:var(--red-soft);color:var(--red);}
+.badge-gray{background:var(--gray-100);color:var(--gray-600);}
+.badge-green{background:#f0faf6;color:#1a7a52;}
+.badge-yellow{background:#fffbeb;color:#92400e;}
+.event-name{font-size:17px;font-weight:700;letter-spacing:-.3px;margin-bottom:6px;}
+.event-date{font-size:12px;font-weight:600;color:var(--red);margin-bottom:10px;}
+.event-desc{font-size:13px;color:var(--gray-600);line-height:1.6;flex:1;}
+.event-conds{display:flex;flex-direction:column;gap:4px;margin-top:10px;}
+.event-cond{font-size:12px;color:var(--gray-600);display:flex;align-items:center;gap:5px;}
+.event-footer{display:flex;align-items:center;justify-content:space-between;margin-top:18px;padding-top:16px;border-top:1px solid var(--gray-100);}
+.event-count{font-size:12px;color:var(--gray-400);font-weight:500;}
+
+/* TURMAS */
+.turmas-list{border:1px solid var(--gray-200);border-radius:var(--radius);overflow:hidden;background:var(--white);}
+.turma-group-title{font-size:13px;font-weight:700;padding:14px 20px 10px;color:var(--gray-600);background:var(--gray-50);border-bottom:1px solid var(--gray-100);}
+.turma-row{display:flex;align-items:center;justify-content:space-between;padding:13px 20px;border-bottom:1px solid var(--gray-100);transition:background .15s;}
+.turma-row:last-child{border-bottom:none;}
+.turma-row:hover{background:var(--gray-50);}
+.turma-row-clickable{cursor:pointer;}
+.turma-row-clickable:hover{background:var(--red-soft)!important;}
+.turma-row-name{font-size:14px;font-weight:500;}
+.turma-row-count{font-size:12px;color:var(--gray-400);}
+/* event detail modal */
+.ev-detail-cond{display:flex;align-items:flex-start;gap:12px;padding:14px;background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--radius-sm);margin-bottom:8px;}
+.ev-detail-cond-icon{font-size:20px;flex-shrink:0;}
+.ev-detail-cond-label{font-size:12px;font-weight:600;color:var(--gray-600);text-transform:uppercase;letter-spacing:.5px;}
+.ev-detail-cond-value{font-size:15px;font-weight:700;color:var(--black);margin-top:2px;}
+/* notif badge */
+.notif-badge{background:var(--red);color:#fff;border-radius:100px;font-size:10px;font-weight:700;padding:2px 6px;margin-left:6px;vertical-align:middle;}
+/* user profile modal */
+.uprofile-av{width:64px;height:64px;background:var(--black);color:var(--white);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;margin:0 auto 16px;}
+.uprofile-name{font-size:20px;font-weight:700;letter-spacing:-.4px;text-align:center;}
+.uprofile-course{font-size:13px;color:var(--gray-600);text-align:center;margin-top:4px;}
+.uprofile-bio{font-size:14px;text-align:center;margin-top:8px;line-height:1.6;}
+.uprofile-chips{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:12px;}
+.member-card{cursor:pointer;transition:box-shadow .2s,border-color .2s;}
+.member-card:hover{box-shadow:var(--shadow-md);border-color:var(--gray-400);}
+.post-author-clickable{cursor:pointer;display:flex;align-items:center;gap:12px;transition:opacity .15s;}
+.post-author-clickable:hover{opacity:.75;}
+/* pending item */
+.pending-item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--radius-sm);margin-bottom:8px;}
+.pending-name{font-size:13px;font-weight:600;}
+.pending-course{font-size:11px;color:var(--gray-600);margin-top:2px;}
+
+/* MODAL */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);backdrop-filter:blur(6px);z-index:200;display:none;align-items:center;justify-content:center;padding:20px;}
+.overlay.show{display:flex;}
+.modal{background:var(--white);border-radius:var(--radius);width:100%;max-width:500px;padding:32px;animation:fadeUp .25s cubic-bezier(.16,1,.3,1);max-height:90vh;overflow-y:auto;position:relative;}
+.modal-close{position:absolute;top:18px;right:18px;background:var(--gray-100);border:none;border-radius:50%;width:30px;height:30px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;color:var(--gray-600);transition:background .2s;}
+.modal-close:hover{background:var(--gray-200);}
+.modal-title{font-size:20px;font-weight:700;letter-spacing:-.5px;margin-bottom:24px;}
+.radio-group{display:flex;flex-direction:column;gap:8px;}
+.radio-option{display:flex;align-items:center;gap:10px;padding:12px 14px;border:1.5px solid var(--gray-200);border-radius:var(--radius-sm);cursor:pointer;transition:all .15s;}
+.radio-option:has(input:checked){border-color:var(--red);background:var(--red-soft);}
+.radio-option input{accent-color:var(--red);}
+.radio-option span{font-size:14px;font-weight:500;}
+.checkbox-option{display:flex;align-items:center;gap:10px;padding:12px 14px;border:1.5px solid var(--gray-200);border-radius:var(--radius-sm);cursor:pointer;transition:all .15s;}
+.checkbox-option:has(input:checked){border-color:var(--red);background:var(--red-soft);}
+.checkbox-option input{accent-color:var(--red);}
+.section-divider{font-size:12px;font-weight:700;color:var(--gray-400);text-transform:uppercase;letter-spacing:.5px;margin:20px 0 12px;}
+
+/* MODAL PERFIL */
+.mp-header{display:flex;align-items:center;gap:16px;margin-bottom:24px;padding-bottom:20px;border-bottom:1px solid var(--gray-200);}
+.mp-av{width:56px;height:56px;background:var(--black);color:var(--white);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;flex-shrink:0;}
+.mp-name{font-size:18px;font-weight:700;letter-spacing:-.3px;}
+.mp-course{font-size:13px;color:var(--gray-600);margin-top:2px;}
+.mp-bio{font-size:14px;margin-top:4px;line-height:1.5;}
+.modal-section{margin-bottom:20px;}
+.modal-section-title{font-size:12px;font-weight:700;color:var(--gray-400);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;}
+.modal-ev-item{background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--radius-sm);padding:12px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px;}
+.modal-ev-name{font-size:13px;font-weight:600;}
+.modal-ev-date{font-size:12px;color:var(--red);font-weight:600;}
+
+/* LOADING */
+.spinner{display:inline-block;width:18px;height:18px;border:2px solid var(--gray-200);border-top-color:var(--red);border-radius:50%;animation:spin .6s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.loading-overlay{position:fixed;inset:0;background:rgba(255,255,255,.7);display:none;align-items:center;justify-content:center;z-index:999;}
+html.dark .loading-overlay{background:rgba(20,20,20,.7);}
+
+.empty{text-align:center;padding:56px 24px;}
+.empty-icon{font-size:44px;margin-bottom:14px;opacity:.25;}
+.empty-text{color:var(--gray-400);font-size:14px;}
+::-webkit-scrollbar{width:5px;}
+::-webkit-scrollbar-thumb{background:var(--gray-200);border-radius:99px;}
+
+@media(max-width:700px){
+  #auth-screen{flex-direction:column;}
+  .auth-left{display:none;}
+  .auth-right{width:100%;padding:40px 28px;}
+  .members-grid,.events-grid{grid-template-columns:1fr;}
+  .stats-row,.fields-row,.fields-3{grid-template-columns:1fr;}
+  .wrap{padding:20px 16px;}
+  .topbar,.main-nav{padding:0 16px;}
+}
+</style>
+</head>
+<body>
+
+<div class="loading-overlay" id="loading" style="display:none"><div class="spinner"></div></div>
+
+<!-- AUTH -->
+<div id="auth-screen">
+  <button class="theme-btn auth-theme-btn" onclick="toggleTheme()" id="auth-theme-btn">🌙</button>
+  <div class="auth-left">
+    <div class="auth-brand">
+      <div><span class="brand-dot"></span><span class="brand-label">Rede Social da FIAP</span></div>
+      <div class="brand-name">Fia<span>Pals</span></div>
+      <div class="brand-sub">Conecte-se com sua turma, explore eventos e compartilhe ideias.</div>
+      <div class="auth-pills"><span class="auth-pill">Turmas</span><span class="auth-pill">Feed</span><span class="auth-pill">Eventos</span><span class="auth-pill">Perfis</span></div>
+    </div>
+  </div>
+  <div class="auth-right">
+    <div class="auth-right-title" id="auth-title">Bem-vindo de volta</div>
+    <div class="auth-right-sub" id="auth-sub">Entre na sua conta para continuar</div>
+    <div class="auth-switcher">
+      <button class="auth-switch-btn active" onclick="switchTab('login')">Entrar</button>
+      <button class="auth-switch-btn" onclick="switchTab('register')">Criar conta</button>
+    </div>
+    <div id="tab-login">
+      <div class="msg msg-error" id="l-err"></div>
+      <div class="field"><label>E-mail</label><input type="email" id="l-email" placeholder="voce@fiap.com.br"></div>
+      <div class="field"><label>Senha</label><input type="password" id="l-senha" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
+      <button class="btn btn-primary" onclick="doLogin()">Entrar</button>
+    </div>
+    <div id="tab-reg" style="display:none">
+      <div class="msg msg-error" id="r-err"></div>
+      <div class="field"><label>Nome completo</label><input type="text" id="r-nome" placeholder="Seu nome"></div>
+      <div class="field"><label>E-mail</label><input type="email" id="r-email" placeholder="voce@fiap.com.br"></div>
+      <div class="field"><label>Senha</label><input type="password" id="r-senha" placeholder="Mínimo 4 caracteres"></div>
+      <div class="fields-row">
+        <div class="field"><label>Curso</label>
+          <select id="r-curso"><option value="">Selecione...</option>
+            <option>Engenharia de Software</option><option>Engenharia da Computacao</option>
+            <option>Ciencia da Computacao</option><option>Sistemas de Informacao</option>
+            <option>Design Digital</option><option>Analise e Desenvolvimento de Sistemas</option>
+            <option>Inteligencia Artificial</option><option>Ciberseguranca</option>
+          </select>
+        </div>
+        <div class="field"><label>Ano</label>
+          <select id="r-ano"><option value="">Ano...</option>
+            <option value="1">1º ano</option><option value="2">2º ano</option>
+            <option value="3">3º ano</option><option value="4">4º ano</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="doRegister()">Criar conta</button>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="main-app">
+  <div class="topbar">
+    <div class="topbar-logo">Fia<span>Pals</span></div>
+    <div class="topbar-right">
+      <button class="theme-btn" onclick="toggleTheme()" id="top-theme-btn">🌙</button>
+      <div class="avatar" id="top-av" onclick="openPerfil()" title="Ver perfil"></div>
+      <span class="topbar-name" id="top-name"></span>
+      <button class="topbar-logout" onclick="doLogout()">Sair</button>
+    </div>
+  </div>
+  <div class="main-nav">
+    <button class="nav-btn active" onclick="goPage('feed')">Feed</button>
+    <button class="nav-btn" onclick="goPage('turma')">Minha Turma</button>
+    <button class="nav-btn" onclick="goPage('explorar')">Explorar</button>
+  </div>
+  <div class="wrap">
+
+    <!-- FEED -->
+    <div class="page active" id="page-feed">
+      <div class="pill-nav">
+        <button class="pill-btn active" onclick="goFeedTab('turma')">Minha Turma</button>
+        <button class="pill-btn" onclick="goFeedTab('geral')">Geral (seguindo)</button>
+      </div>
+
+      <!-- Feed da turma -->
+      <div id="ft-turma">
+        <div style="margin-bottom:20px">
+          <div style="font-size:12px;color:var(--gray-600);font-weight:500;margin-bottom:4px">Feed da turma</div>
+          <div style="font-size:20px;font-weight:700;letter-spacing:-.5px" id="feed-title"></div>
+        </div>
+        <div class="composer">
+          <div class="composer-top">
+            <div class="avatar avatar-red" id="comp-av"></div>
+            <div class="composer-right">
+              <textarea id="post-txt" placeholder="Compartilhe algo com sua turma..." oninput="updateCC()"></textarea>
+              <div class="foto-preview" id="foto-preview">
+                <img id="foto-preview-img" src="" alt="">
+                <button class="foto-preview-remove" onclick="removeFoto()">✕</button>
+              </div>
+              <div class="composer-footer">
+                <div style="display:flex;align-items:center;gap:10px">
+                  <button class="attach-btn" onclick="document.getElementById('foto-input').click()">📷 Foto</button>
+                  <input type="file" id="foto-input" accept="image/*" style="display:none" onchange="previewFoto(this)">
+                  <span class="char-count" id="cc">0 / 500</span>
+                </div>
+                <button class="btn btn-primary btn-sm" onclick="pubPost()">Publicar</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="feed-turma-list"></div>
+      </div>
+
+      <!-- Feed geral -->
+      <div id="ft-geral" style="display:none">
+        <div style="margin-bottom:20px">
+          <div style="font-size:12px;color:var(--gray-600);font-weight:500;margin-bottom:4px">Posts de pessoas que você segue</div>
+          <div style="font-size:20px;font-weight:700;letter-spacing:-.5px">Feed Geral</div>
+        </div>
+        <div id="feed-geral-list"></div>
+      </div>
+    </div>
+
+    <!-- TURMA -->
+    <div class="page" id="page-turma">
+      <div style="margin-bottom:24px">
+        <div style="font-size:12px;color:var(--gray-600);font-weight:500;margin-bottom:4px">Sua turma</div>
+        <div style="font-size:22px;font-weight:700;letter-spacing:-.5px" id="turma-title"></div>
+      </div>
+      <div class="pill-nav">
+        <button class="pill-btn active" onclick="goTurmaTab('membros')">Membros</button>
+        <button class="pill-btn" onclick="goTurmaTab('eventos')">Eventos</button>
+      </div>
+      <div id="tt-membros"><div class="members-grid" id="members-grid"></div></div>
+      <div id="tt-eventos" style="display:none">
+        <div style="display:flex;justify-content:flex-end;margin-bottom:16px">
+          <button class="btn btn-primary btn-sm" onclick="openCreateEv()">+ Criar evento</button>
+        </div>
+        <div class="events-grid" id="turma-ev-grid"></div>
+      </div>
+    </div>
+
+    <!-- EXPLORAR -->
+    <div class="page" id="page-explorar">
+      <div class="pill-nav">
+        <button class="pill-btn active" onclick="goExplTab('eventos')">Eventos</button>
+        <button class="pill-btn" onclick="goExplTab('turmas')">Turmas</button>
+      </div>
+      <div id="et-eventos">
+        <div style="display:flex;justify-content:flex-end;margin-bottom:16px">
+          <button class="btn btn-primary btn-sm" onclick="openCreateEv()">+ Criar evento</button>
+        </div>
+        <div class="events-grid" id="all-ev-grid"></div>
+      </div>
+      <div id="et-turmas" style="display:none"><div id="turmas-list"></div></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL PERFIL -->
+<div class="overlay" id="modal-perfil">
+  <div class="modal">
+    <button class="modal-close" onclick="closeM('modal-perfil')">✕</button>
+    <div class="mp-header">
+      <div class="mp-av" id="mp-av"></div>
+      <div><div class="mp-name" id="mp-name"></div><div class="mp-course" id="mp-course"></div><div class="mp-bio" id="mp-bio"></div></div>
+    </div>
+    <div class="stats-row" style="margin-bottom:20px">
+      <div class="stat-card"><div class="stat-label">Eventos inscritos</div><div class="stat-value" id="mp-st-ev">0</div></div>
+      <div class="stat-card"><div class="stat-label">Interesses</div><div class="stat-value" id="mp-st-int">0</div></div>
+    </div>
+    <div class="modal-section" id="mp-int-sec">
+      <div class="modal-section-title">Interesses</div>
+      <div class="chips-row" id="mp-chips" style="margin-top:0"></div>
+    </div>
+    <div class="modal-section">
+      <div class="modal-section-title">Editar perfil</div>
+      <div class="field" style="margin-bottom:10px">
+        <label>Bio</label>
+        <div class="edit-row"><div class="field"><input type="text" id="e-bio" placeholder="Escreva algo sobre você..."></div><button class="btn btn-ghost btn-sm" onclick="saveBio()">Salvar</button></div>
+      </div>
+      <div class="field" style="margin-bottom:0">
+        <label>Interesses <span style="color:var(--gray-400);font-weight:400">(por vírgula)</span></label>
+        <div class="edit-row"><div class="field"><input type="text" id="e-int" placeholder="Python, UX, Games, IA..."></div><button class="btn btn-ghost btn-sm" onclick="saveInt()">Salvar</button></div>
+      </div>
+      <div class="msg msg-success" id="pf-ok" style="margin-top:10px;margin-bottom:0">Salvo com sucesso ✓</div>
+    </div>
+    <div class="modal-section" id="mp-posts-sec">
+      <div class="modal-section-title">Meus posts</div>
+      <div id="mp-posts-list"></div>
+    </div>
+    <div class="modal-section" id="mp-ev-sec">
+      <div class="modal-section-title">Meus eventos</div>
+      <div id="mp-ev-list"></div>
+    </div>
+    <div class="modal-section" id="mp-pending-sec" style="display:none">
+      <div class="modal-section-title">⏳ Inscrições pendentes nos meus eventos <span class="notif-badge" id="mp-pending-count">0</span></div>
+      <div id="mp-pending-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL DETALHES DO EVENTO -->
+<div class="overlay" id="modal-ev-detail">
+  <div class="modal" style="max-width:480px">
+    <button class="modal-close" onclick="closeM('modal-ev-detail')">✕</button>
+    <div class="modal-title" id="evd-nome"></div>
+    <div style="font-size:12px;font-weight:600;color:var(--red);margin-bottom:6px" id="evd-data"></div>
+    <div style="font-size:13px;color:var(--gray-600);margin-bottom:20px;line-height:1.6" id="evd-desc"></div>
+    <div id="evd-conds" style="margin-bottom:20px"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;font-size:13px;color:var(--gray-400);padding-top:16px;border-top:1px solid var(--gray-200);margin-bottom:20px">
+      <span id="evd-count"></span>
+      <span id="evd-turma" style="font-size:12px"></span>
+    </div>
+    <div id="evd-action"></div>
+  </div>
+</div>
+
+<!-- MODAL PERFIL DE OUTRO USUÁRIO -->
+<div class="overlay" id="modal-uprofile">
+  <div class="modal" style="max-width:420px">
+    <button class="modal-close" onclick="closeM('modal-uprofile')">✕</button>
+    <div style="padding-top:8px">
+      <div class="uprofile-av" id="up-av"></div>
+      <div class="uprofile-name" id="up-name"></div>
+      <div class="uprofile-course" id="up-course"></div>
+      <div class="uprofile-bio" id="up-bio"></div>
+      <div class="uprofile-chips" id="up-chips"></div>
+      <div style="display:flex;justify-content:center;margin-top:20px">
+        <button class="btn btn-primary btn-sm" id="up-follow-btn" onclick="toggleSeguirModal()"></button>
+      </div>
+      <div id="up-posts-sec" style="margin-top:24px;display:none">
+        <div class="modal-section-title" style="font-size:12px;font-weight:700;color:var(--gray-400);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px">Posts recentes</div>
+        <div id="up-posts" style="display:flex;flex-direction:column;gap:10px"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL MEMBROS DA TURMA (EXPLORAR) -->
+<div class="overlay" id="modal-turma-membros">
+  <div class="modal" style="max-width:540px">
+    <button class="modal-close" onclick="closeM('modal-turma-membros')">✕</button>
+    <div class="modal-title" id="mt-title"></div>
+    <div id="mt-membros-grid" class="members-grid" style="margin-top:4px"></div>
+  </div>
+</div>
+
+<!-- MODAL CRIAR EVENTO -->
+<div class="overlay" id="modal-ev">
+  <div class="modal" style="max-width:560px">
+    <button class="modal-close" onclick="closeM('modal-ev')">✕</button>
+    <div class="modal-title">Criar evento</div>
+    <div class="msg msg-error" id="ev-err"></div>
+    <div class="field"><label>Nome do evento</label><input type="text" id="ev-nome" placeholder="Ex: Hackathon de IA"></div>
+    <div class="fields-row">
+      <div class="field"><label>Data (DD/MM/AAAA)</label><input type="text" id="ev-data" placeholder="25/06/2025" maxlength="10"></div>
+      <div class="field"><label>Descrição</label><input type="text" id="ev-desc" placeholder="Sobre o evento..."></div>
+    </div>
+
+    <div class="section-divider">Acesso</div>
+    <div class="field">
+      <div class="radio-group">
+        <label class="radio-option"><input type="radio" name="ev-tipo" value="aberto" checked><span>Aberto para todos</span></label>
+        <label class="radio-option"><input type="radio" name="ev-tipo" value="curso"><span>Só alunos do meu curso</span></label>
+        <label class="radio-option"><input type="radio" name="ev-tipo" value="turma"><span>Só minha turma</span></label>
+      </div>
+    </div>
+
+    <div class="section-divider">Condições <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:12px">(opcionais)</span></div>
+    <div class="fields-3">
+      <div class="field"><label>💰 Valor (R$)</label><input type="number" id="ev-pagamento" placeholder="0,00" min="0" step="0.01"></div>
+      <div class="field"><label>🎟 Vagas</label><input type="number" id="ev-vagas" placeholder="Ilimitado" min="1"></div>
+      <div class="field"><label>🔞 Idade mínima</label><input type="number" id="ev-idade" placeholder="Sem limite" min="1"></div>
+    </div>
+    <div class="field">
+      <label class="checkbox-option" style="margin-bottom:0">
+        <input type="checkbox" id="ev-confirmacao" style="accent-color:var(--red)">
+        <span>✋ Requer confirmação do organizador</span>
+      </label>
+    </div>
+
+    <button class="btn btn-primary" style="margin-top:16px" onclick="createEv()">Criar evento</button>
+  </div>
+</div>
+
+<script>
+const API = '';
+let CU = null;
+
+function ini(n){ return n.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2); }
+function esc(t){ return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function showLoad(v){ document.getElementById('loading').style.display = v?'flex':'none'; }
+function openM(id){ document.getElementById(id).classList.add('show'); }
+function closeM(id){ document.getElementById(id).classList.remove('show'); }
+document.querySelectorAll('.overlay').forEach(el=>el.addEventListener('click',e=>{if(e.target===el)closeM(el.id);}));
+
+async function api(path, opts={}){
+  const isFormData = opts.body instanceof FormData;
+  const headers = isFormData ? {} : {'Content-Type':'application/json',...(opts.headers||{})};
+  const res = await fetch(API+path, {
+    credentials:'include', headers, ...opts,
+    body: isFormData ? opts.body : (opts.body ? JSON.stringify(opts.body) : undefined)
+  });
+  const text = await res.text();
+  let data;
+  try { data = JSON.parse(text); }
+  catch(e) { throw new Error('Erro no servidor: ' + text.slice(0,120)); }
+  if(!res.ok) throw new Error(data.erro||'Erro desconhecido');
+  return data;
+}
+
+async function apiFD(path, formData){
+  const res = await fetch(API+path, { method:'POST', credentials:'include', body: formData });
+  const text = await res.text();
+  let data;
+  try { data = JSON.parse(text); }
+  catch(e) { throw new Error('Erro no servidor: ' + text.slice(0,120)); }
+  if(!res.ok) throw new Error(data.erro||'Erro');
+  return data;
+}
+
+function showErr(id,msg){ const el=document.getElementById(id); el.textContent=msg; el.classList.add('show'); }
+function hideErr(id){ document.getElementById(id).classList.remove('show'); }
+
+// TEMA
+function toggleTheme(){
+  const dark=document.documentElement.classList.toggle('dark');
+  localStorage.setItem('fp_theme',dark?'dark':'light');
+  const icon=dark?'☀️':'🌙';
+  document.querySelectorAll('#top-theme-btn,#auth-theme-btn').forEach(b=>b.textContent=icon);
+}
+function initTheme(){
+  const saved=localStorage.getItem('fp_theme');
+  const prefersDark=window.matchMedia('(prefers-color-scheme: dark)').matches;
+  if(saved==='dark'||(saved===null&&prefersDark)){
+    document.documentElement.classList.add('dark');
+    document.querySelectorAll('#top-theme-btn,#auth-theme-btn').forEach(b=>b.textContent='☀️');
+  }
+}
+
+// AUTH
+function switchTab(t){
+  document.getElementById('tab-login').style.display=t==='login'?'block':'none';
+  document.getElementById('tab-reg').style.display=t==='register'?'block':'none';
+  document.querySelectorAll('.auth-switch-btn').forEach((b,i)=>b.classList.toggle('active',(i===0&&t==='login')||(i===1&&t==='register')));
+  document.getElementById('auth-title').textContent=t==='login'?'Bem-vindo de volta':'Crie sua conta';
+  document.getElementById('auth-sub').textContent=t==='login'?'Entre na sua conta para continuar':'Junte-se à comunidade FiaPals';
+}
+async function doLogin(){
+  hideErr('l-err');
+  const email=document.getElementById('l-email').value.trim();
+  const senha=document.getElementById('l-senha').value;
+  if(!email||!senha){showErr('l-err','Preencha todos os campos.');return;}
+  showLoad(true);
+  try{const d=await api('/api/login',{method:'POST',body:{email,senha}});CU=d.usuario;showApp();}
+  catch(e){showErr('l-err',e.message);}
+  finally{showLoad(false);}
+}
+async function doRegister(){
+  hideErr('r-err');
+  const nome=document.getElementById('r-nome').value.trim();
+  const email=document.getElementById('r-email').value.trim();
+  const senha=document.getElementById('r-senha').value;
+  const curso=document.getElementById('r-curso').value;
+  const ano=document.getElementById('r-ano').value;
+  if(!nome||!email||!senha||!curso||!ano){showErr('r-err','Preencha todos os campos.');return;}
+  showLoad(true);
+  try{const d=await api('/api/cadastrar',{method:'POST',body:{nome,email,senha,curso,ano:parseInt(ano)}});CU=d.usuario;showApp();}
+  catch(e){showErr('r-err',e.message);}
+  finally{showLoad(false);}
+}
+async function doLogout(){
+  await api('/api/logout',{method:'POST'});
+  CU=null;
+  document.getElementById('main-app').style.display='none';
+  document.getElementById('auth-screen').style.display='flex';
+}
+
+// APP
+function showApp(){
+  document.getElementById('auth-screen').style.display='none';
+  document.getElementById('main-app').style.display='block';
+  document.getElementById('top-av').textContent=ini(CU.nome);
+  document.getElementById('top-name').textContent=CU.nome;
+  document.getElementById('comp-av').textContent=ini(CU.nome);
+  renderFeedTurma();
+}
+function goPage(p){
+  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(x=>x.classList.remove('active'));
+  document.getElementById('page-'+p).classList.add('active');
+  const idx={feed:0,turma:1,explorar:2}[p];
+  document.querySelectorAll('.nav-btn')[idx].classList.add('active');
+  if(p==='feed')renderFeedTurma();
+  if(p==='turma')renderTurma();
+  if(p==='explorar')renderExplor();
+}
+
+// FEED TABS
+function goFeedTab(tab){
+  ['turma','geral'].forEach(x=>document.getElementById('ft-'+x).style.display='none');
+  document.getElementById('ft-'+tab).style.display='block';
+  document.querySelectorAll('#page-feed .pill-btn').forEach((b,i)=>b.classList.toggle('active',['turma','geral'][i]===tab));
+  if(tab==='turma')renderFeedTurma();
+  if(tab==='geral')renderFeedGeral();
+}
+
+// FOTO PREVIEW
+let fotoFile = null;
+function previewFoto(input){
+  const f=input.files[0]; if(!f)return;
+  fotoFile=f;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    document.getElementById('foto-preview-img').src=e.target.result;
+    document.getElementById('foto-preview').style.display='block';
+  };
+  reader.readAsDataURL(f);
+}
+function removeFoto(){
+  fotoFile=null;
+  document.getElementById('foto-preview').style.display='none';
+  document.getElementById('foto-preview-img').src='';
+  document.getElementById('foto-input').value='';
+}
+
+// FEED TURMA
+async function renderFeedTurma(){
+  showLoad(true);
+  try{
+    const [td,fd]=await Promise.all([api('/api/turma'),api('/api/turma/feed')]);
+    document.getElementById('feed-title').textContent=`${td.curso} — ${td.ano}º ano`;
+    renderPostList('feed-turma-list', fd.posts, false);
+  }catch(e){console.error(e);}
+  finally{showLoad(false);}
+}
+
+// FEED GERAL
+async function renderFeedGeral(){
+  showLoad(true);
+  try{
+    const d=await api('/api/feed/geral');
+    if(!d.posts.length){
+      document.getElementById('feed-geral-list').innerHTML='<div class="empty"><div class="empty-icon">🌐</div><div class="empty-text">Nenhum post ainda. Siga pessoas na aba Minha Turma para ver posts aqui.</div></div>';
+      return;
+    }
+    renderPostList('feed-geral-list', d.posts, true);
+  }catch(e){console.error(e);}
+  finally{showLoad(false);}
+}
+
+function renderPostList(containerId, posts, showTurma){
+  const el=document.getElementById(containerId);
+  if(!posts.length){el.innerHTML='<div class="empty"><div class="empty-icon">💬</div><div class="empty-text">Nenhum post ainda.</div></div>';return;}
+  el.innerHTML=posts.map(p=>{
+    const isMe = p.autor_id === CU.id;
+    const clickAttr = isMe ? '' : `onclick="openUProfile('${p.autor_id}')" style="cursor:pointer"`;
+    const hoverClass = isMe ? '' : 'post-author-clickable';
+    return `<div class="post-card">
+      <div class="post-header">
+        <div class="post-avatar ${hoverClass}" ${clickAttr}>${ini(p.autor_nome)}</div>
+        <div class="${hoverClass}" ${clickAttr}>
+          <div class="post-author">${esc(p.autor_nome)}${isMe?'':' <span style="font-size:11px;color:var(--gray-400);font-weight:400">ver perfil →</span>'}</div>
+          <div class="post-date">${p.data}</div>
+          ${showTurma&&p.turma_nome?`<div class="post-turma-badge">📚 ${esc(p.turma_nome)}</div>`:''}
+        </div>
+      </div>
+      ${p.conteudo?`<div class="post-body">${esc(p.conteudo)}</div>`:''}
+      ${p.foto_url?`<img class="post-img" src="${esc(p.foto_url)}" alt="foto do post" loading="lazy">`:''}
+    </div>`;
+  }).join('');
+}
+
+function updateCC(){
+  const l=document.getElementById('post-txt').value.length;
+  const el=document.getElementById('cc');
+  el.textContent=l+' / 500';
+  el.classList.toggle('warn',l>450);
+}
+
+async function pubPost(){
+  const txt=document.getElementById('post-txt').value.trim();
+  if(!txt&&!fotoFile){return;}
+  if(txt.length>500){alert('Máximo 500 caracteres.');return;}
+  showLoad(true);
+  try{
+    if(fotoFile){
+      const fd=new FormData();
+      if(txt) fd.append('conteudo',txt);
+      fd.append('foto',fotoFile);
+      await apiFD('/api/turma/post',fd);
+    } else {
+      await api('/api/turma/post',{method:'POST',body:{conteudo:txt}});
+    }
+    document.getElementById('post-txt').value='';
+    removeFoto(); updateCC();
+    await renderFeedTurma();
+  }catch(e){alert(e.message);}
+  finally{showLoad(false);}
+}
+
+// TURMA
+async function renderTurma(){
+  showLoad(true);
+  try{
+    const d=await api('/api/turma');
+    document.getElementById('turma-title').textContent=`${d.curso} — ${d.ano}º ano`;
+    renderMembros(d.membros);
+  }catch(e){console.error(e);}
+  finally{showLoad(false);}
+}
+function goTurmaTab(tab){
+  ['membros','eventos'].forEach(x=>document.getElementById('tt-'+x).style.display='none');
+  document.getElementById('tt-'+tab).style.display='block';
+  document.querySelectorAll('#page-turma .pill-btn').forEach((b,i)=>b.classList.toggle('active',['membros','eventos'][i]===tab));
+  if(tab==='membros')renderTurma();
+  if(tab==='eventos')renderTurmaEv();
+}
+function renderMembros(membros){
+  const g=document.getElementById('members-grid');
+  if(!membros||!membros.length){g.innerHTML='<div class="empty"><div class="empty-icon">👥</div><div class="empty-text">Nenhum membro ainda.</div></div>';return;}
+  const seguindo=new Set(CU.seguindo||[]);
+  g.innerHTML=membros.map(u=>{
+    if(u.id===CU.id) return '';
+    const tags=(u.interesses||[]).slice(0,3).map(i=>`<span class="chip" style="font-size:11px">${esc(i)}</span>`).join('');
+    const jaSeguindo=seguindo.has(u.id);
+    const badge=jaSeguindo?`<span class="badge badge-green" style="margin-top:10px;display:inline-block">✓ Seguindo</span>`:'';
+    return `<div class="member-card" onclick="openUProfile('${u.id}')">
+      <div class="member-avatar">${ini(u.nome)}</div>
+      <div class="member-name">${esc(u.nome)}</div>
+      <div class="member-bio">${esc(u.bio||'')}</div>
+      <div class="chips-row" style="justify-content:center">${tags}</div>
+      <div class="member-actions">${badge}</div>
+    </div>`;
+  }).join('');
+}
+
+async function renderTurmaEv(){
+  showLoad(true);
+  try{
+    const d=await api('/api/turma/eventos');
+    const g=document.getElementById('turma-ev-grid');
+    if(!d.eventos.length){g.innerHTML='<div class="empty" style="grid-column:1/-1"><div class="empty-icon">🎉</div><div class="empty-text">Nenhum evento ainda.</div></div>';return;}
+    g.innerHTML=d.eventos.map(e=>evCard(e,false)).join('');
+  }catch(e){console.error(e);}
+  finally{showLoad(false);}
+}
+
+// EXPLORAR
+function renderExplor(){ goExplTab('eventos'); }
+function goExplTab(tab){
+  ['eventos','turmas'].forEach(x=>document.getElementById('et-'+x).style.display='none');
+  document.getElementById('et-'+tab).style.display='block';
+  document.querySelectorAll('#page-explorar .pill-btn').forEach((b,i)=>b.classList.toggle('active',['eventos','turmas'][i]===tab));
+  if(tab==='eventos') renderAllEv();
+  if(tab==='turmas')  renderTurmasL();
+}
+async function renderAllEv(){
+  showLoad(true);
+  try{
+    // Busca eventos visíveis ao usuário E também os da própria turma (caso sejam restritos)
+    const [dGeral, dTurma] = await Promise.all([
+      api('/api/eventos').catch(()=>({eventos:[]})),
+      api('/api/turma/eventos').catch(()=>({eventos:[]}))
+    ]);
+    // Une as duas listas sem duplicar
+    const vistos = new Set();
+    const todos = [];
+    for(const ev of [...dGeral.eventos, ...dTurma.eventos]){
+      if(!vistos.has(ev.id)){ vistos.add(ev.id); todos.push(ev); }
+    }
+    const g=document.getElementById('all-ev-grid');
+    if(!todos.length){
+      g.innerHTML='<div class="empty" style="grid-column:1/-1"><div class="empty-icon">🎉</div><div class="empty-text">Nenhum evento ainda.</div></div>';
+      return;
+    }
+    g.innerHTML=todos.map(e=>evCard(e,true)).join('');
+  }catch(e){console.error(e);}
+  finally{showLoad(false);}
+}
+
+function evCard(e, showBtn){
+  const acesso=e.aberto?'<span class="badge badge-red">Aberto</span>':'<span class="badge badge-gray">Restrito</span>';
+  const inscBadge=e.inscrito&&!e.pendente?'<span class="badge badge-green">✓ Inscrito</span>':'';
+  const pendBadge=e.pendente?'<span class="badge badge-yellow">⏳ Pendente</span>':'';
+  let conds='';
+  if(e.pagamento)    conds+=`<div class="event-cond">💰 R$ ${parseFloat(e.pagamento).toFixed(2)} por pessoa</div>`;
+  if(e.vagas)        conds+=`<div class="event-cond">🎟 ${e.vagas_disponiveis??e.vagas} vagas disponíveis</div>`;
+  if(e.idade_minima) conds+=`<div class="event-cond">🔞 Idade mínima: ${e.idade_minima} anos</div>`;
+  if(e.requer_confirmacao) conds+=`<div class="event-cond">✋ Requer confirmação do organizador</div>`;
+
+  let btn = '';
+  const souCriador = e.criado_por === CU.id;
+  if(souCriador){
+    // criador vê o botão de gerenciar (abrir detalhe pra ver inscritos pendentes)
+    btn = `<button class="btn btn-ghost btn-sm" onclick="abrirDetalheEvento('${e.id}')">Gerenciar</button>`;
+  } else if(!e.inscrito && !e.pendente){
+    // outros usuários sempre veem "Ver evento" para poder se inscrever
+    btn = `<button class="btn btn-primary btn-sm" onclick="abrirDetalheEvento('${e.id}')">Ver evento</button>`;
+  }
+
+  return `<div class="event-card">
+    <div class="event-tag-row">${acesso}${inscBadge}${pendBadge}</div>
+    <div class="event-name">${esc(e.nome)}</div>
+    <div class="event-date">${esc(e.data)}</div>
+    <div class="event-desc">${esc(e.descricao)}</div>
+    ${conds?`<div class="event-conds">${conds}</div>`:''}
+    <div class="event-footer"><span class="event-count">${e.total_participantes} inscrito(s)</span>${btn}</div>
+  </div>`;
+}
+
+let _eventoAtual = null;
+
+async function abrirDetalheEvento(id){
+  showLoad(true);
+  try{
+    // Busca em todos os endpoints disponíveis para garantir que acha o evento
+    let e = null;
+    try{
+      const d = await api('/api/eventos');
+      e = d.eventos.find(ev=>ev.id===id);
+    }catch(_){}
+    if(!e){
+      try{
+        const d2 = await api('/api/turma/eventos');
+        e = d2.eventos.find(ev=>ev.id===id);
+      }catch(_){}
+    }
+    if(!e){ showLoad(false); return; }
+    _eventoAtual = e;
+
+    document.getElementById('evd-nome').textContent = e.nome;
+    document.getElementById('evd-data').textContent = e.data;
+    document.getElementById('evd-desc').textContent = e.descricao;
+    document.getElementById('evd-count').textContent = `${e.total_participantes} inscrito(s)`;
+    document.getElementById('evd-turma').textContent = e.turma_nome || '';
+
+    // condições detalhadas
+    const condsEl = document.getElementById('evd-conds');
+    let html = '';
+    if(e.pagamento) html+=`<div class="ev-detail-cond"><div class="ev-detail-cond-icon">💰</div><div><div class="ev-detail-cond-label">Valor por pessoa</div><div class="ev-detail-cond-value">R$ ${parseFloat(e.pagamento).toFixed(2)}</div></div></div>`;
+    if(e.vagas)     html+=`<div class="ev-detail-cond"><div class="ev-detail-cond-icon">🎟</div><div><div class="ev-detail-cond-label">Vagas disponíveis</div><div class="ev-detail-cond-value">${e.vagas_disponiveis??e.vagas} de ${e.vagas}</div></div></div>`;
+    if(e.idade_minima) html+=`<div class="ev-detail-cond"><div class="ev-detail-cond-icon">🔞</div><div><div class="ev-detail-cond-label">Idade mínima</div><div class="ev-detail-cond-value">${e.idade_minima} anos</div></div></div>`;
+    if(e.requer_confirmacao) html+=`<div class="ev-detail-cond"><div class="ev-detail-cond-icon">✋</div><div><div class="ev-detail-cond-label">Inscrição</div><div class="ev-detail-cond-value">Requer confirmação do organizador</div></div></div>`;
+    if(!html) html=`<div style="font-size:13px;color:var(--gray-400);padding:8px 0">Sem condições especiais — entrada gratuita e aberta.</div>`;
+    condsEl.innerHTML = html;
+
+    // botão de ação
+    const actionEl = document.getElementById('evd-action');
+    if(e.inscrito){
+      actionEl.innerHTML=`<div class="msg msg-success show" style="margin:0">✓ Você já está inscrito neste evento.</div>`;
+    } else if(e.pendente){
+      actionEl.innerHTML=`<div class="msg" style="display:block;background:#fffbeb;color:#92400e;border:1px solid #fde68a;border-radius:var(--radius-sm);padding:11px 14px;margin:0">⏳ Sua inscrição está aguardando confirmação do organizador.</div>`;
+    } else {
+      const label = e.requer_confirmacao ? 'Solicitar inscrição' : 'Confirmar inscrição';
+      actionEl.innerHTML=`<button class="btn btn-primary" onclick="inscrever('${e.id}')">${label}</button>`;
+    }
+
+    openM('modal-ev-detail');
+  }catch(err){console.error(err);}
+  finally{showLoad(false);}
+}
+
+async function inscrever(id){
+  showLoad(true);
+  try{
+    const d=await api(`/api/eventos/${id}/inscrever`,{method:'POST'});
+    const me=await api('/api/me');
+    CU=me.usuario;
+    closeM('modal-ev-detail');
+    // atualiza os grids
+    await renderAllEv();
+    await renderTurmaEv();
+    alert(d.msg||'Inscrição realizada!');
+  }catch(e){alert(e.message);}
+  finally{showLoad(false);}
+}
+
+async function renderTurmasL(){
+  showLoad(true);
+  try{
+    const d=await api('/api/turmas');
+    const el=document.getElementById('turmas-list');
+    const cursos=[...new Set(d.turmas.map(t=>t.curso))];
+    let html='<div class="turmas-list">';
+    cursos.forEach(curso=>{
+      html+=`<div class="turma-group-title">${esc(curso)}</div>`;
+      d.turmas.filter(t=>t.curso===curso).forEach(t=>{
+        const click = t.total_membros>0;
+        html+=`<div class="turma-row${click?' turma-row-clickable':''}" ${click?`onclick="openTurmaMembros('${t.id}','${esc(t.curso)}',${t.ano})"`:''}>
+          <span class="turma-row-name">${t.ano}º ano</span>
+          <span style="display:flex;align-items:center;gap:10px">
+            <span class="turma-row-count">${t.total_membros} aluno(s)</span>
+            ${click?'<span style="font-size:12px;color:var(--gray-400)">ver alunos →</span>':''}
+          </span>
+        </div>`;
+      });
+    });
+    html+='</div>';
+    el.innerHTML=html;
+  }catch(e){console.error(e);}
+  finally{showLoad(false);}
+}
+
+async function openTurmaMembros(turmaId, curso, ano){
+  showLoad(true);
+  try{
+    const d = await api(`/api/turmas/${turmaId}/membros`);
+    document.getElementById('mt-title').textContent=`${d.curso} — ${d.ano}º ano`;
+    const g=document.getElementById('mt-membros-grid');
+    if(!d.membros.length){
+      g.innerHTML='<div class="empty" style="grid-column:1/-1"><div class="empty-icon">👥</div><div class="empty-text">Nenhum aluno nesta turma ainda.</div></div>';
+    } else {
+      const seg=new Set(CU.seguindo||[]);
+      g.innerHTML=d.membros.map(u=>{
+        if(u.id===CU.id) return '';
+        const tags=(u.interesses||[]).slice(0,3).map(i=>`<span class="chip" style="font-size:11px">${esc(i)}</span>`).join('');
+        const badge=seg.has(u.id)?`<span class="badge badge-green" style="margin-top:10px;display:inline-block">✓ Seguindo</span>`:'';
+        return `<div class="member-card" onclick="openUProfileFromTurma('${u.id}','${turmaId}')">
+          <div class="member-avatar">${ini(u.nome)}</div>
+          <div class="member-name">${esc(u.nome)}</div>
+          <div class="member-bio">${esc(u.bio||'')}</div>
+          <div class="chips-row" style="justify-content:center">${tags}</div>
+          <div class="member-actions">${badge}</div>
+        </div>`;
+      }).join('');
+    }
+    openM('modal-turma-membros');
+  }catch(e){console.error(e);}
+  finally{showLoad(false);}
+}
+
+async function openUProfileFromTurma(autorId, turmaId){
+  closeM('modal-turma-membros');
+  showLoad(true);
+  try{
+    const d=await api(`/api/turmas/${turmaId}/membros`);
+    const u=d.membros.find(m=>m.id===autorId);
+    if(!u){return;}
+    _uprofileId=autorId;
+    const jaSeg=new Set(CU.seguindo||[]).has(autorId);
+    document.getElementById('up-av').textContent=ini(u.nome);
+    document.getElementById('up-name').textContent=u.nome;
+    document.getElementById('up-course').textContent=`${u.curso} · ${u.ano}º ano`;
+    document.getElementById('up-bio').textContent=u.bio||'';
+    document.getElementById('up-chips').innerHTML=(u.interesses||[]).map(i=>`<span class="chip">${esc(i)}</span>`).join('');
+    const btn=document.getElementById('up-follow-btn');
+    btn.textContent=jaSeg?'Deixar de seguir':'Seguir';
+    btn.className=jaSeg?'btn btn-outline btn-sm':'btn btn-primary btn-sm';
+    document.getElementById('up-posts-sec').style.display='none';
+    openM('modal-uprofile');
+  }catch(e){console.error(e);}
+  finally{showLoad(false);}
+}
+
+// PERFIL MODAL
+async function openPerfil(){
+  showLoad(true);
+  try{
+    const [meData, postsData] = await Promise.all([
+      api('/api/me'),
+      api('/api/perfil/posts').catch(()=>({posts:[]}))
+    ]);
+    CU = meData.usuario;
+    document.getElementById('mp-av').textContent=ini(CU.nome);
+    document.getElementById('mp-name').textContent=CU.nome;
+    document.getElementById('mp-course').textContent=`${CU.curso} · ${CU.ano}º ano`;
+    document.getElementById('mp-bio').textContent=CU.bio||'';
+    document.getElementById('mp-st-ev').textContent=(CU.eventos_inscritos||[]).length;
+    document.getElementById('mp-st-int').textContent=(CU.interesses||[]).length;
+    document.getElementById('e-bio').value=CU.bio||'';
+    document.getElementById('e-int').value=(CU.interesses||[]).join(', ');
+    const chips=document.getElementById('mp-chips');
+    chips.innerHTML=(CU.interesses||[]).map(i=>`<span class="chip">${esc(i)}</span>`).join('');
+    document.getElementById('mp-int-sec').style.display=(CU.interesses||[]).length?'block':'none';
+
+    // meus posts
+    const postsList=document.getElementById('mp-posts-list');
+    if(!postsData.posts.length){
+      postsList.innerHTML='<div style="font-size:13px;color:var(--gray-400)">Nenhum post ainda.</div>';
+    } else {
+      postsList.innerHTML=postsData.posts.map(p=>`
+        <div class="post-card" style="margin-bottom:10px">
+          <div style="font-size:12px;color:var(--gray-400);margin-bottom:8px">${p.data} · ${esc(p.turma_nome||'')}</div>
+          ${p.conteudo?`<div class="post-body">${esc(p.conteudo)}</div>`:''}
+          ${p.foto_url?`<img class="post-img" src="${esc(p.foto_url)}" alt="" style="max-height:160px">`:''}
+        </div>`).join('');
+    }
+    document.getElementById('mp-posts-sec').style.display='block';
+
+    // meus eventos inscritos — busca nas duas listas e une
+    const ids = CU.eventos_inscritos||[];
+    const evList = document.getElementById('mp-ev-list');
+    if(!ids.length){
+      evList.innerHTML='<div style="font-size:13px;color:var(--gray-400)">Nenhum evento inscrito ainda.</div>';
+      document.getElementById('mp-ev-sec').style.display='none';
+    } else {
+      try{
+        const [dg, dt] = await Promise.all([
+          api('/api/eventos').catch(()=>({eventos:[]})),
+          api('/api/turma/eventos').catch(()=>({eventos:[]}))
+        ]);
+        const vistos = new Set();
+        const todos = [];
+        for(const ev of [...dg.eventos, ...dt.eventos]){
+          if(!vistos.has(ev.id)){vistos.add(ev.id);todos.push(ev);}
+        }
+        const meus = todos.filter(e=>ids.includes(e.id));
+        evList.innerHTML = meus.length
+          ? meus.map(e=>`
+              <div class="modal-ev-item">
+                <div><div class="modal-ev-name">${esc(e.nome)}</div><div class="modal-ev-date">${esc(e.data)}</div></div>
+                ${e.pendente?'<span class="badge badge-yellow">⏳ Pendente</span>':'<span class="badge badge-green">✓ Confirmado</span>'}
+              </div>`).join('')
+          : '<div style="font-size:13px;color:var(--gray-400)">Nenhum evento inscrito ainda.</div>';
+        document.getElementById('mp-ev-sec').style.display='block';
+
+        // inscrições pendentes nos meus eventos (sou organizador)
+        const meusEventos = todos.filter(e=>e.criado_por===CU.id);
+        let totalPendentes = 0;
+        let pendingHTML = '';
+        for(const ev of meusEventos){
+          if(ev.pendentes_lista && ev.pendentes_lista.length > 0){
+            try{
+              const pd = await api(`/api/eventos/${ev.id}/pendentes`);
+              if(pd.pendentes.length){
+                totalPendentes += pd.pendentes.length;
+                pendingHTML += `<div style="font-size:13px;font-weight:600;margin-bottom:8px;margin-top:12px">${esc(ev.nome)}</div>`;
+                pendingHTML += pd.pendentes.map(p=>`
+                  <div class="pending-item">
+                    <div>
+                      <div class="pending-name">${esc(p.nome)}</div>
+                      <div class="pending-course">${esc(p.curso)} · ${p.ano}º ano</div>
+                    </div>
+                    <button class="btn btn-primary btn-sm" onclick="confirmarPendente('${ev.id}','${p.id}')">Confirmar</button>
+                  </div>`).join('');
+              }
+            }catch(_){}
+          }
+        }
+        const pendSec = document.getElementById('mp-pending-sec');
+        if(totalPendentes > 0){
+          document.getElementById('mp-pending-count').textContent = totalPendentes;
+          document.getElementById('mp-pending-list').innerHTML = pendingHTML;
+          pendSec.style.display = 'block';
+        } else {
+          pendSec.style.display = 'none';
+        }
+      }catch(_){
+        document.getElementById('mp-ev-sec').style.display = 'none';
+      }
+    }
+
+    openM('modal-perfil');
+  }catch(e){console.error('openPerfil error:', e);}
+  finally{showLoad(false);}
+}
+
+async function confirmarPendente(eventoId, userId){
+  showLoad(true);
+  try{
+    await api(`/api/eventos/${eventoId}/confirmar/${userId}`,{method:'POST'});
+    await openPerfil(); // recarrega o modal
+  }catch(e){alert(e.message);}
+  finally{showLoad(false);}
+}
+
+async function saveBio(){
+  const bio=document.getElementById('e-bio').value.trim();
+  try{const d=await api('/api/perfil',{method:'PUT',body:{bio}});CU=d.usuario;flash();openPerfil();}
+  catch(e){alert(e.message);}
+}
+async function saveInt(){
+  const lista=document.getElementById('e-int').value.split(',').map(i=>i.trim()).filter(Boolean);
+  try{const d=await api('/api/perfil',{method:'PUT',body:{interesses:lista}});CU=d.usuario;flash();openPerfil();}
+  catch(e){alert(e.message);}
+}
+function flash(){const el=document.getElementById('pf-ok');el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2200);}
+
+// PERFIL DE OUTROS USUÁRIOS
+let _uprofileId = null;
+
+async function openUProfile(autorId){
+  if(autorId===CU.id) return;
+  showLoad(true);
+  try{
+    // 1. Tenta buscar direto pelo ID (funciona para qualquer turma)
+    let u = null;
+    try{
+      const d = await api(`/api/usuario/${autorId}`);
+      u = d.usuario;
+    }catch(_){}
+
+    // 2. Fallback: tenta na turma atual
+    if(!u){
+      try{
+        const turmaData = await api('/api/turma');
+        u = turmaData.membros.find(m=>m.id===autorId);
+      }catch(_){}
+    }
+
+    // 3. Fallback final: extrai nome do feed (dados mínimos)
+    if(!u){
+      try{
+        const feedData = await api('/api/feed/geral');
+        const post = feedData.posts.find(p=>p.autor_id===autorId);
+        if(post) u = {id:autorId, nome:post.autor_nome, curso:'', ano:'', bio:'', interesses:[]};
+      }catch(_){}
+    }
+
+    if(!u){ showLoad(false); return; }
+
+    _uprofileId = autorId;
+    const jaSeg = new Set(CU.seguindo||[]).has(autorId);
+
+    document.getElementById('up-av').textContent = ini(u.nome);
+    document.getElementById('up-name').textContent = u.nome;
+    document.getElementById('up-course').textContent = u.curso && u.ano ? `${u.curso} · ${u.ano}º ano` : u.curso||'';
+    document.getElementById('up-bio').textContent = u.bio||'';
+    document.getElementById('up-chips').innerHTML = (u.interesses||[]).map(i=>`<span class="chip">${esc(i)}</span>`).join('');
+
+    const btn = document.getElementById('up-follow-btn');
+    btn.textContent = jaSeg ? 'Deixar de seguir' : 'Seguir';
+    btn.className   = jaSeg ? 'btn btn-outline btn-sm' : 'btn btn-primary btn-sm';
+
+    // Posts recentes: tenta feed geral (inclui posts de outras turmas)
+    const sec = document.getElementById('up-posts-sec');
+    try{
+      const [fg, ft] = await Promise.all([
+        api('/api/feed/geral').catch(()=>({posts:[]})),
+        api('/api/turma/feed').catch(()=>({posts:[]}))
+      ]);
+      const vistos = new Set();
+      const todosPosts = [];
+      for(const p of [...fg.posts, ...ft.posts]){
+        if(!vistos.has(p.id) && p.autor_id===autorId){ vistos.add(p.id); todosPosts.push(p); }
+      }
+      const posts = todosPosts.slice(0,5);
+      if(posts.length){
+        document.getElementById('up-posts').innerHTML = posts.map(p=>`
+          <div class="post-card" style="margin-bottom:0">
+            <div style="font-size:12px;color:var(--gray-400);margin-bottom:8px">${p.data}</div>
+            ${p.conteudo?`<div class="post-body">${esc(p.conteudo)}</div>`:''}
+            ${p.foto_url?`<img class="post-img" src="${esc(p.foto_url)}" alt="" style="max-height:180px">`:''}
+          </div>`).join('');
+        sec.style.display='block';
+      } else { sec.style.display='none'; }
+    }catch(_){ sec.style.display='none'; }
+
+    openM('modal-uprofile');
+  }catch(e){console.error(e);}
+  finally{showLoad(false);}
+}
+
+async function toggleSeguirModal(){
+  if(!_uprofileId) return;
+  const jaSeg=new Set(CU.seguindo||[]).has(_uprofileId);
+  showLoad(true);
+  try{
+    await api(`/api/seguir/${_uprofileId}`,{method:jaSeg?'DELETE':'POST'});
+    const me=await api('/api/me');
+    CU=me.usuario;
+    const novoJaSeg=new Set(CU.seguindo||[]).has(_uprofileId);
+    const btn=document.getElementById('up-follow-btn');
+    btn.textContent=novoJaSeg?'Deixar de seguir':'Seguir';
+    btn.className=novoJaSeg?'btn btn-outline btn-sm':'btn btn-primary btn-sm';
+    renderTurma();
+  }catch(e){alert(e.message);}
+  finally{showLoad(false);}
+}
+
+async function toggleSeguir(uid, seguir){
+  showLoad(true);
+  try{
+    await api(`/api/seguir/${uid}`,{method:seguir?'POST':'DELETE'});
+    const me=await api('/api/me');
+    CU=me.usuario;
+    await renderTurma();
+  }catch(e){alert(e.message);}
+  finally{showLoad(false);}
+}
+
+// CRIAR EVENTO
+function openCreateEv(){
+  ['ev-nome','ev-data','ev-desc','ev-pagamento','ev-vagas','ev-idade'].forEach(id=>document.getElementById(id).value='');
+  document.querySelector('input[name="ev-tipo"][value="aberto"]').checked=true;
+  document.getElementById('ev-confirmacao').checked=false;
+  hideErr('ev-err');
+  openM('modal-ev');
+}
+async function createEv(){
+  const nome=document.getElementById('ev-nome').value.trim();
+  const data=document.getElementById('ev-data').value.trim();
+  const desc=document.getElementById('ev-desc').value.trim();
+  const tipo=document.querySelector('input[name="ev-tipo"]:checked').value;
+  hideErr('ev-err');
+  if(!nome||!data||!desc){showErr('ev-err','Preencha os campos obrigatórios.');return;}
+  showLoad(true);
+  try{
+    await api('/api/eventos/criar',{method:'POST',body:{
+      nome, data, descricao:desc, tipo,
+      pagamento: document.getElementById('ev-pagamento').value||null,
+      vagas: document.getElementById('ev-vagas').value||null,
+      idade_minima: document.getElementById('ev-idade').value||null,
+      requer_confirmacao: document.getElementById('ev-confirmacao').checked,
+    }});
+    closeM('modal-ev');
+    await renderTurmaEv();
+  }catch(e){showErr('ev-err',e.message);}
+  finally{showLoad(false);}
+}
+
+document.getElementById('ev-data').addEventListener('input',function(){
+  let v=this.value.replace(/\D/g,'');
+  if(v.length>=3)v=v.slice(0,2)+'/'+v.slice(2);
+  if(v.length>=6)v=v.slice(0,5)+'/'+v.slice(5,9);
+  this.value=v;
+});
+
+async function init(){
+  initTheme();
+  try{const d=await api('/api/me');CU=d.usuario;showApp();}
+  catch(e){/* não logado */}
+}
+init();
+</script>
+</body>
+</html>
