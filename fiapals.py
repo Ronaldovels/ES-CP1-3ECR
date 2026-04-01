@@ -485,3 +485,124 @@ def criar_evento():
     usr.setdefault("eventos_inscritos", []).append(eid)
     db_salvar(db)
     return jsonify({"evento": _serializar_evento(evento, u["id"], db)}), 201
+
+# ===== FUNÇÃO: inscrever =====
+@app.route("/api/eventos/<evento_id>/inscrever", methods=["POST"])
+def inscrever(evento_id):
+    u = usuario_logado()
+    if not u:
+        return jsonify({"erro": "Não autenticado."}), 401
+    db     = db_carregar()
+    evento = achar_evento(db, evento_id)
+    if not evento:
+        return jsonify({"erro": "Evento não encontrado."}), 404
+    if u["id"] in evento["participantes"] or u["id"] in evento.get("pendentes", []):
+        return jsonify({"erro": "Você já está inscrito ou com inscrição pendente."}), 400
+
+    cond = evento.get("condicoes", {})
+
+    if cond.get("vagas"):
+        if len(evento.get("confirmados", [])) >= cond["vagas"]:
+            return jsonify({"erro": "Sem vagas disponíveis."}), 400
+
+    if not cond.get("aberto", True):
+        if cond.get("cursos_permitidos") and u["curso"] not in cond["cursos_permitidos"]:
+            return jsonify({"erro": f"Restrito ao curso: {', '.join(cond['cursos_permitidos'])}."}), 403
+        if not cond.get("cursos_permitidos"):
+            turma_ev = next((t for t in db["turmas"] if t["id"] == evento["turma_id"]), None)
+            if turma_ev and u["id"] not in turma_ev["membros"]:
+                return jsonify({"erro": "Evento restrito à turma criadora."}), 403
+
+    evento["participantes"].append(u["id"])
+    usr = achar_usuario_id(db, u["id"])
+    usr.setdefault("eventos_inscritos", []).append(evento_id)
+
+    if cond.get("requer_confirmacao"):
+        evento.setdefault("pendentes", []).append(u["id"])
+        db_salvar(db)
+        return jsonify({"ok": True, "pendente": True, "msg": "Inscrição enviada! Aguardando confirmação."})
+    else:
+        evento.setdefault("confirmados", []).append(u["id"])
+        db_salvar(db)
+        return jsonify({"ok": True, "pendente": False, "msg": "Inscrição confirmada!"})
+
+
+# ===== FUNÇÃO: listar_pendentes =====
+@app.route("/api/eventos/<evento_id>/pendentes")
+def listar_pendentes(evento_id):
+    u = usuario_logado()
+    if not u:
+        return jsonify({"erro": "Não autenticado."}), 401
+    db     = db_carregar()
+    evento = achar_evento(db, evento_id)
+    if not evento or evento.get("criado_por") != u["id"]:
+        return jsonify({"erro": "Não autorizado."}), 403
+    pendentes = [_pub(achar_usuario_id(db, pid)) for pid in evento.get("pendentes", []) if achar_usuario_id(db, pid)]
+    return jsonify({"pendentes": pendentes})
+
+
+# ===== FUNÇÃO: confirmar_participante =====
+@app.route("/api/eventos/<evento_id>/confirmar/<uid_alvo>", methods=["POST"])
+def confirmar_participante(evento_id, uid_alvo):
+    u = usuario_logado()
+    if not u:
+        return jsonify({"erro": "Não autenticado."}), 401
+    db     = db_carregar()
+    evento = achar_evento(db, evento_id)
+    if not evento or evento.get("criado_por") != u["id"]:
+        return jsonify({"erro": "Não autorizado."}), 403
+    if uid_alvo not in evento.get("pendentes", []):
+        return jsonify({"erro": "Participante não encontrado nos pendentes."}), 404
+    evento["pendentes"].remove(uid_alvo)
+    evento.setdefault("confirmados", []).append(uid_alvo)
+    db_salvar(db)
+    return jsonify({"ok": True})
+
+# ── EXPLORAR ────────────────────────────────────────
+
+
+# ===== FUNÇÃO: listar_turmas =====
+@app.route("/api/turmas")
+def listar_turmas():
+    u = usuario_logado()
+    if not u:
+        return jsonify({"erro": "Não autenticado."}), 401
+    db = db_carregar()
+    return jsonify({"turmas": [
+        {"id": t["id"], "curso": t["curso"], "ano": t["ano"], "total_membros": len(t["membros"])}
+        for t in db["turmas"]
+    ]})
+
+
+# ===== FUNÇÃO: get_usuario =====
+@app.route("/api/usuario/<uid>")
+def get_usuario(uid):
+    u = usuario_logado()
+    if not u:
+        return jsonify({"erro": "Não autenticado."}), 401
+    db = db_carregar()
+    alvo = achar_usuario_id(db, uid)
+    if not alvo:
+        return jsonify({"erro": "Usuário não encontrado."}), 404
+    return jsonify({"usuario": _pub(alvo)})
+
+
+# ===== FUNÇÃO: membros_da_turma =====
+@app.route("/api/turmas/<turma_id>/membros")
+def membros_da_turma(turma_id):
+    u = usuario_logado()
+    if not u:
+        return jsonify({"erro": "Não autenticado."}), 401
+    db = db_carregar()
+    turma = next((t for t in db["turmas"] if t["id"] == turma_id), None)
+    if not turma:
+        return jsonify({"erro": "Turma não encontrada."}), 404
+    membros = [_pub(achar_usuario_id(db, mid)) for mid in turma["membros"] if achar_usuario_id(db, mid)]
+    return jsonify({"curso": turma["curso"], "ano": turma["ano"], "membros": membros})
+
+# ===== BLOCO PRINCIPAL =====
+if __name__ == "__main__":
+    print(f"\n  FiaPals rodando em http://localhost:5000")
+    print(f"  Uploads salvos em: {UPLOAD_DIR}\n")
+    app.run(debug=True, port=5000)
+
