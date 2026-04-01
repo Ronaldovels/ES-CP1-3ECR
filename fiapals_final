@@ -134,3 +134,94 @@ def _serializar_evento(e, uid, db):
 def index():
     return send_from_directory(BASE_DIR, "index.html")
 
+# ===== FUNÇÃO: uploaded_file =====
+@app.route("/uploads/<path:filename>")
+def uploaded_file(filename):
+    return send_from_directory(UPLOAD_DIR, filename)
+
+# ── AUTH ────────────────────────────────────────────
+
+
+# ===== FUNÇÃO: cadastrar =====
+@app.route("/api/cadastrar", methods=["POST"])
+def cadastrar():
+    data  = request.json
+    nome  = data.get("nome", "").strip()
+    email = data.get("email", "").strip()
+    senha = data.get("senha", "")
+    curso = data.get("curso", "")
+    ano   = data.get("ano")
+    if not all([nome, email, senha, curso, ano]):
+        return jsonify({"erro": "Preencha todos os campos."}), 400
+    if len(senha) < 4:
+        return jsonify({"erro": "Senha muito curta (mínimo 4 caracteres)."}), 400
+    if curso not in CURSOS:
+        return jsonify({"erro": "Curso inválido."}), 400
+    if int(ano) not in ANOS:
+        return jsonify({"erro": "Ano inválido."}), 400
+    db = db_carregar()
+    if achar_usuario(db, email):
+        return jsonify({"erro": "E-mail já cadastrado."}), 400
+    uid = str(uuid.uuid4())
+    usuario = {
+        "id": uid, "nome": nome, "email": email.lower(),
+        "senha_hash": hash_senha(senha), "curso": curso, "ano": int(ano),
+        "bio": "", "interesses": [], "eventos_inscritos": [], "seguindo": []
+    }
+    db["usuarios"].append(usuario)
+    turma = achar_turma(db, curso, int(ano))
+    if turma:
+        turma["membros"].append(uid)
+    db_salvar(db)
+    session["usuario_id"] = uid
+    return jsonify({"usuario": _pub(usuario)}), 201
+
+
+# ===== FUNÇÃO: login =====
+@app.route("/api/login", methods=["POST"])
+def login():
+    data  = request.json
+    email = data.get("email", "").strip()
+    senha = data.get("senha", "")
+    db    = db_carregar()
+    u     = achar_usuario(db, email)
+    if not u or u["senha_hash"] != hash_senha(senha):
+        return jsonify({"erro": "E-mail ou senha incorretos."}), 401
+    session["usuario_id"] = u["id"]
+    return jsonify({"usuario": _pub(u)})
+
+
+# ===== FUNÇÃO: logout =====
+@app.route("/api/logout", methods=["POST"])
+def logout():
+    session.clear()
+    return jsonify({"ok": True})
+
+
+# ===== FUNÇÃO: me =====
+@app.route("/api/me")
+def me():
+    u = usuario_logado()
+    if not u:
+        return jsonify({"erro": "Não autenticado."}), 401
+    return jsonify({"usuario": _pub(u)})
+
+# ── PERFIL ──────────────────────────────────────────
+
+
+# ===== FUNÇÃO: atualizar_perfil =====
+@app.route("/api/perfil", methods=["PUT"])
+def atualizar_perfil():
+    u = usuario_logado()
+    if not u:
+        return jsonify({"erro": "Não autenticado."}), 401
+    data = request.json
+    db   = db_carregar()
+    usr  = achar_usuario_id(db, u["id"])
+    if "bio" in data:
+        usr["bio"] = data["bio"].strip()
+    if "interesses" in data:
+        usr["interesses"] = [i.strip() for i in data["interesses"] if i.strip()]
+    db_salvar(db)
+    return jsonify({"usuario": _pub(usr)})
+
