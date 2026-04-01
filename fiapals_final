@@ -75,3 +75,62 @@ def achar_usuario_id(db, uid):
 def achar_turma(db, curso, ano):
     tid = f"{curso.lower().replace(' ', '-')}-{ano}ano"
     return next((t for t in db["turmas"] if t["id"] == tid), None)
+
+# ===== FUNÇÃO: achar_evento =====
+def achar_evento(db, evento_id):
+    return next((e for e in db["eventos"] if e["id"] == evento_id), None)
+
+
+# ===== FUNÇÃO: usuario_logado =====
+def usuario_logado():
+    uid = session.get("usuario_id")
+    if not uid:
+        return None
+    db = db_carregar()
+    return achar_usuario_id(db, uid)
+
+
+# ===== FUNÇÃO: allowed =====
+def allowed(filename):
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXT
+
+
+# ===== FUNÇÃO: _pub =====
+def _pub(u):
+    return {k: v for k, v in u.items() if k != "senha_hash"}
+
+
+# ===== FUNÇÃO: _serializar_evento =====
+def _serializar_evento(e, uid, db):
+    turma = next((t for t in db["turmas"] if t["id"] == e["turma_id"]), None)
+    cond  = e.get("condicoes", {})
+    vagas = cond.get("vagas")
+    confirmados = len(e.get("confirmados", []))
+    return {
+        "id": e["id"],
+        "nome": e["nome"],
+        "data": e["data"],
+        "descricao": e["descricao"],
+        "turma_nome": f"{turma['curso']} {turma['ano']}º ano" if turma else "?",
+        "aberto": cond.get("aberto", True),
+        "cursos_permitidos": cond.get("cursos_permitidos", []),
+        "total_participantes": len(e["participantes"]),
+        "inscrito": uid in e["participantes"],
+        "pendente": uid in e.get("pendentes", []),
+        "pagamento": cond.get("pagamento"),
+        "vagas": vagas,
+        "vagas_disponiveis": (vagas - confirmados) if vagas else None,
+        "idade_minima": cond.get("idade_minima"),
+        "requer_confirmacao": cond.get("requer_confirmacao", False),
+        "criado_por": e.get("criado_por"),
+        "pendentes_lista": e.get("pendentes", []) if e.get("criado_por") == uid else [],
+    }
+
+# ── SERVE STATIC ────────────────────────────────────
+
+
+# ===== FUNÇÃO: index =====
+@app.route("/")
+def index():
+    return send_from_directory(BASE_DIR, "index.html")
+
